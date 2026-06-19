@@ -4,27 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>チラシみっけ｜チラシをAIがWeb・SNSコンテンツに変換</title>
-<meta name="description" content="紙のチラシ・DM・メニュー表をアップロードするだけでAIがSNS投稿文とWebページ用コンテンツを自動生成します">
-
-<!-- Favicon設定 -->
-<link rel="icon" href="favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="favicon.png">
-
-<!-- OGP設定 -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="チラシみっけ｜チラシをAIがWeb・SNSコンテンツに変換">
-<meta property="og:description" content="紙のチラシ・DM・メニュー表をアップロードするだけでAIがSNS投稿文とWebページ用コンテンツを自動生成します">
-<meta property="og:site_name" content="チラシみっけ">
-<!-- ※OGP画像やURLは、本番公開時に絶対URL（https://...から始まるURL）に変更することをおすすめします -->
-<meta property="og:image" content="ogp.jpg">
-<!-- <meta property="og:url" content="https://あなたのドメイン.com/"> -->
-
-<!-- Twitter Card設定 -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="チラシみっけ｜チラシをAIがWeb・SNSコンテンツに変換">
-<meta name="twitter:description" content="紙のチラシ・DM・メニュー表をアップロードするだけでAIがSNS投稿文とWebページ用コンテンツを自動生成します">
-<meta name="twitter:image" content="ogp.jpg">
-
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -67,6 +46,8 @@ header {
   display: flex;
   align-items: center;
   gap: 10px;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .logo-icon {
@@ -78,6 +59,13 @@ header {
   align-items: center;
   justify-content: center;
   font-size: 16px;
+  flex-shrink: 0;
+}
+
+.logo-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .logo-text {
@@ -85,10 +73,19 @@ header {
   font-weight: 900;
   color: var(--text);
   letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .logo-text span {
   color: var(--primary);
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
 .header-badge {
@@ -607,6 +604,59 @@ main {
   overflow-y: auto;
 }
 
+/* HTMLプレビュー分割 */
+.html-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.html-preview-pane {
+  border-right: 1px solid var(--border);
+  background: var(--white);
+}
+
+.html-preview-header {
+  padding: 8px 14px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.html-preview-frame {
+  width: 100%;
+  height: 200px;
+  border: none;
+  background: var(--white);
+  display: block;
+}
+
+.html-code-pane {
+  background: #1A1A2E;
+}
+
+.html-code-header {
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (max-width: 600px) {
+  .html-split { grid-template-columns: 1fr; }
+  .html-preview-pane { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
 /* アクションボタン */
 .action-bar {
   padding: 20px 28px;
@@ -776,25 +826,592 @@ main {
   background: #e05e00;
 }
 
+/* ===== ヘッダーボタン ===== */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-btn {
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.header-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.header-btn-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  font-family: 'Noto Sans JP', sans-serif;
+  padding: 0 12px;
+  height: 36px;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.header-btn-label:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+/* ===== モーダル共通 ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 300;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 80px 16px 20px;
+  overflow-y: auto;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal-box {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: var(--bg);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+
+.modal-title {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== 使い方モーダル ===== */
+.howto-section {
+  margin-bottom: 20px;
+}
+
+.howto-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.howto-purpose {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.howto-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.howto-list li {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.6;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.howto-num {
+  width: 20px;
+  height: 20px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ===== 設定モーダル ===== */
+.setting-item {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.setting-item:last-child { border-bottom: none; }
+
+.setting-info {}
+
+.setting-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.setting-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.setting-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  border: none;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.setting-btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.setting-btn-primary:hover { background: var(--primary-dark); }
+
+.setting-btn-danger {
+  background: #FEE2E2;
+  color: #DC2626;
+}
+
+.setting-btn-danger:hover { background: #FCA5A5; }
+
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.toggle input { display: none; }
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 12px;
+  transition: 0.2s;
+}
+
+.toggle input:checked + .toggle-slider {
+  background: var(--primary);
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+}
+
+/* ===== モード切替タブ ===== */ */
+.app-layout {
+  display: block;
+}
+
+.mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 6px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.mode-tab {
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.mode-tab-icon {
+  font-size: 20px;
+}
+
+.mode-tab.active {
+  background: var(--primary);
+  color: var(--white);
+  box-shadow: 0 2px 8px rgba(0,102,204,0.2);
+}
+
+.mode-tab:hover:not(.active) {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.mode-content {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .mode-tab {
+    font-size: 12px;
+    padding: 12px 8px;
+    gap: 4px;
+  }
+  .mode-tab-icon { font-size: 16px; }
+}
+
+/* ===== チラシ作成フォーム ===== */
+.create-card {
+  display: none;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+}
+
+.create-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.create-form {}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text);
+  background: var(--white);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--primary);
+}
+
+.form-textarea {
+  min-height: 90px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.create-preview-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.create-preview-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.create-preview-frame-wrap {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg);
+  min-height: 500px;
+  position: relative;
+}
+
+.create-preview-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 13px;
+  gap: 8px;
+}
+
+.create-preview-placeholder-icon { font-size: 40px; }
+
+#createPreviewFrame {
+  width: 100%;
+  min-height: 500px;
+  border: none;
+  display: none;
+  transition: min-height 0.3s;
+}
+
+.create-action-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.btn-create-dl {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  transition: all 0.15s;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-dl-html {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.btn-dl-html:hover { background: var(--primary-dark); }
+
+.btn-dl-png {
+  background: var(--white);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-dl-png:hover { border-color: var(--primary); color: var(--primary); }
+
+.create-loading {
+  display: none;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.create-loading .loading-spinner {
+  margin: 0 auto 12px;
+}
+
 @media (max-width: 600px) {
   .genre-grid { grid-template-columns: repeat(3, 1fr); }
   .sns-grid { grid-template-columns: 1fr; }
+  .create-layout { grid-template-columns: 1fr; }
+  .mode-tab { font-size: 12px; padding: 10px 8px; }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-logo">
+  <div class="header-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">
     <div class="logo-icon">📄</div>
-    <div class="logo-text">チラシ<span>みっけ</span></div>
+    <div class="logo-text-wrap">
+      <div class="logo-text">チラシ<span>みっけ</span></div>
+      <div class="logo-sub">紙のチラシが、デジタルコンテンツに変わる。</div>
+    </div>
   </div>
-
+  <div class="header-actions">
+    <button class="header-btn-label" onclick="showHowto()">❓ 使い方</button>
+    <button class="header-btn" onclick="showSettings()" title="設定">⚙️</button>
+  </div>
 </header>
+
+<!-- 使い方モーダル -->
+<div class="modal-overlay" id="howtoModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('howtoModal')">✕</button>
+    <div class="modal-title">❓ チラシみっけ 使い方</div>
+
+    <div class="howto-section">
+      <div class="howto-section-title">アプリの目的</div>
+      <div class="howto-purpose">
+        チラシみっけは、紙のチラシをデジタルコンテンツに変換したり、AIが自動でオリジナルチラシをデザインするツールです。SNS運用・Web集客・営業提案の現場でそのまま使えます。
+      </div>
+    </div>
+
+    <div class="howto-section">
+      <div class="howto-section-title">📄 チラシ→デジタル変換の使い方</div>
+      <ul class="howto-list">
+        <li><div class="howto-num">1</div>チラシ・DM・メニューなどの画像をアップロードする</li>
+        <li><div class="howto-num">2</div>業種を選ぶ（任意）</li>
+        <li><div class="howto-num">3</div>「AIでコンテンツを生成」ボタンを押す</li>
+        <li><div class="howto-num">4</div>X・Instagram・LINE・Facebook用の投稿文が自動生成される</li>
+        <li><div class="howto-num">5</div>「Webコンテンツ」タブでSEOタイトル・本文・HTMLも確認できる</li>
+        <li><div class="howto-num">6</div>コピーボタンでそのままSNSに貼り付けて使う</li>
+      </ul>
+    </div>
+
+    <div class="howto-section" style="margin-top:16px;">
+      <div class="howto-section-title">✏️ チラシをつくるの使い方</div>
+      <ul class="howto-list">
+        <li><div class="howto-num">1</div>「チラシをつくる」タブを選ぶ</li>
+        <li><div class="howto-num">2</div>チラシの種類・タイトル・日時・内容などを入力する</li>
+        <li><div class="howto-num">3</div>「AIでチラシを生成」ボタンを押す</li>
+        <li><div class="howto-num">4</div>右側にAIがデザインしたチラシのプレビューが表示される</li>
+        <li><div class="howto-num">5</div>HTMLで保存→ブラウザで印刷、または画像（PNG）で保存できる</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 設定モーダル -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
+    <div class="modal-title">⚙️ 設定</div>
+
+    <div class="setting-item">
+      <div class="setting-info">
+        <div class="setting-label">🎪 デモデータを入れる</div>
+        <div class="setting-desc">チラシ作成フォームにサンプルデータを自動入力します。営業デモに便利です。</div>
+      </div>
+      <button class="setting-btn setting-btn-primary" onclick="fillDemoData()">入力する</button>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-info">
+        <div class="setting-label">🗑️ デモデータをクリア</div>
+        <div class="setting-desc">チラシ作成フォームの入力内容をすべて消去します。</div>
+      </div>
+      <button class="setting-btn setting-btn-danger" onclick="clearDemoData()">クリア</button>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-info">
+        <div class="setting-label">✅ 実行確認を表示する</div>
+        <div class="setting-desc">生成ボタンを押したときに確認ダイアログを表示します。</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="confirmToggle" onchange="saveConfirmSetting()">
+        <div class="toggle-slider"></div>
+      </label>
+    </div>
+
+  </div>
+</div>
 
 <main>
 
-  <div class="catch">
+  <div class="app-layout">
+
+    <!-- 横並び2タブ -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="modeTabConvert" onclick="switchMode('convert')">
+        <span class="mode-tab-icon">📄</span>
+        チラシ→デジタルコンテンツ
+      </button>
+      <button class="mode-tab" id="modeTabCreate" onclick="switchMode('create')">
+        <span class="mode-tab-icon">✏️</span>
+        チラシをつくる
+      </button>
+    </div>
+
+    <!-- コンテンツエリア -->
+    <div class="mode-content">
+
+  <!-- 変換モード キャッチ -->
+  <div class="catch" id="convertCatch" style="text-align:center;margin-bottom:20px;">
     <h1>チラシを撮るだけで<br>Web・SNSコンテンツに変換</h1>
     <p>紙のチラシ・DM・メニュー表をアップロードするだけで<br>AIがSNS投稿文とWebページ用コンテンツを自動生成します</p>
   </div>
@@ -867,6 +1484,92 @@ main {
       ✨ AIでコンテンツを生成する
     </button>
 
+  </div>
+
+  <!-- チラシ作成カード -->
+  <div class="create-card" id="createCard">
+    <div class="card-title">
+      <div class="card-title-num">✏️</div>
+      チラシの情報を入力してAIが自動デザイン
+    </div>
+
+    <div class="create-layout">
+      <!-- 入力フォーム -->
+      <div class="create-form">
+        <div class="form-group">
+          <label class="form-label">チラシの種類</label>
+          <select class="form-select" id="createType">
+            <option value="">選択してください</option>
+            <option value="イベント・セール">🎪 イベント・セール</option>
+            <option value="新メニュー・新商品">🍽️ 新メニュー・新商品</option>
+            <option value="キャンペーン・割引">💰 キャンペーン・割引</option>
+            <option value="会社案内・サービス紹介">🏢 会社案内・サービス紹介</option>
+            <option value="採用・求人">👥 採用・求人</option>
+            <option value="開店・移転のお知らせ">🎉 開店・移転のお知らせ</option>
+            <option value="季節のご挨拶">🌸 季節のご挨拶</option>
+            <option value="地域・町内会のお知らせ">📋 地域・町内会のお知らせ</option>
+            <option value="税理士・士業のご案内">⚖️ 税理士・士業のご案内</option>
+            <option value="その他">📄 その他</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">タイトル・イベント名</label>
+          <input class="form-input" id="createTitle" type="text" placeholder="例：夏の大感謝セール、新メニュー登場">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">日時・期間</label>
+          <input class="form-input" id="createDate" type="text" placeholder="例：2025年7月1日（火）〜7月31日（木）">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">場所・住所</label>
+          <input class="form-input" id="createPlace" type="text" placeholder="例：〇〇市〇〇町1-2-3 / オンライン">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">内容・説明（自由記入）</label>
+          <textarea class="form-textarea" id="createBody" placeholder="例：全品20%OFF！ドリンク無料サービスあり。お子様連れ大歓迎。"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">問い合わせ先・URL・電話番号</label>
+          <input class="form-input" id="createContact" type="text" placeholder="例：Tel.048-000-0000 / https://example.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">店名・会社名</label>
+          <input class="form-input" id="createShop" type="text" placeholder="例：スマイルプラスコンサルティング">
+        </div>
+
+        <button class="btn-generate" id="createBtn" onclick="createChirashi()" style="margin-top:8px;">
+          ✨ AIでチラシを生成する
+        </button>
+      </div>
+
+      <!-- プレビューエリア -->
+      <div class="create-preview-area">
+        <div class="create-preview-label">
+          🖼️ プレビュー
+        </div>
+        <div class="create-preview-frame-wrap">
+          <div class="create-preview-placeholder" id="createPlaceholder">
+            <div class="create-preview-placeholder-icon">📄</div>
+            <div>情報を入力して生成ボタンを押すと<br>ここにチラシが表示されます</div>
+          </div>
+          <div class="create-loading" id="createLoading">
+            <div class="loading-spinner"></div>
+            AIがデザイン中です...
+          </div>
+          <iframe id="createPreviewFrame"></iframe>
+        </div>
+        <div class="create-action-bar" id="createActionBar" style="display:none;">
+          <button class="btn-create-dl btn-dl-html" onclick="downloadChirashiHTML()">📄 HTMLで保存（印刷用）</button>
+          <button class="btn-create-dl btn-dl-png" onclick="downloadChirashiPNG()">🖼️ 画像で保存（PNG）</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ローディング -->
@@ -957,13 +1660,22 @@ main {
       </div>
 
       <div class="web-section">
-        <div class="web-section-title">HTMLスニペット（そのまま貼り付け可）</div>
-        <div class="code-block">
-          <div class="code-header">
-            <span class="code-lang">HTML</span>
-            <button class="copy-btn" style="border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);" onclick="copyText('txt-web-html', this)">コピー</button>
+        <div class="web-section-title">HTMLスニペット（左：プレビュー　右：コード）</div>
+        <div class="html-split">
+          <div class="html-preview-pane">
+            <div class="html-preview-header">
+              <span>PREVIEW</span>
+              <button class="copy-btn" onclick="refreshPreview()">🔄 更新</button>
+            </div>
+            <iframe class="html-preview-frame" id="htmlPreviewFrame"></iframe>
           </div>
-          <div class="code-text" id="txt-web-html">生成中...</div>
+          <div class="html-code-pane">
+            <div class="html-code-header">
+              <span class="code-lang">HTML</span>
+              <button class="copy-btn" style="border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);" onclick="copyText('txt-web-html', this)">コピー</button>
+            </div>
+            <div class="code-text" id="txt-web-html">生成中...</div>
+          </div>
         </div>
       </div>
 
@@ -974,6 +1686,9 @@ main {
       <button class="btn-action btn-action-outline" onclick="resetAll()">🔄 別のチラシを読み込む</button>
     </div>
   </div>
+
+    </div><!-- /mode-content -->
+  </div><!-- /app-layout -->
 
   <div class="footer-note">
     生成されたコンテンツは必ずご確認のうえご利用ください<br>
@@ -1004,6 +1719,239 @@ main {
 </div>
 
 <script>
+// ========== モーダル制御 ==========
+function showHowto() {
+  document.getElementById('howtoModal').classList.add('show');
+}
+
+function showSettings() {
+  // トグルの状態を復元
+  const saved = localStorage.getItem('chirashi_confirm') === '1';
+  document.getElementById('confirmToggle').checked = saved;
+  document.getElementById('settingsModal').classList.add('show');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+// モーダル外クリックで閉じる
+document.addEventListener('click', e => {
+  ['howtoModal', 'settingsModal'].forEach(id => {
+    const modal = document.getElementById(id);
+    if (modal && e.target === modal) modal.classList.remove('show');
+  });
+});
+
+// ========== デモデータ ==========
+function fillDemoData() {
+  switchMode('create');
+  closeModal('settingsModal');
+  setTimeout(() => {
+    document.getElementById('createType').value  = 'イベント・セール';
+    document.getElementById('createTitle').value = '夏の大感謝フェア2025';
+    document.getElementById('createDate').value  = '2025年7月19日（土）〜7月21日（月）10:00〜18:00';
+    document.getElementById('createPlace').value = '〇〇市民会館 大ホール（〇〇市〇〇町1-1-1）';
+    document.getElementById('createBody').value  = '地域最大級のお得なイベント開催！全品20%OFF、豪華景品が当たる抽選会、キッズコーナーも充実。ご来場の方全員に粗品プレゼント。ご家族・お友達お誘い合わせの上、ぜひご来場ください。';
+    document.getElementById('createContact').value = 'Tel.048-000-0000 / info@example.com';
+    document.getElementById('createShop').value  = 'スマイルプラスフェア実行委員会';
+  }, 300);
+}
+
+function clearDemoData() {
+  if (!confirm('入力内容をすべてクリアしますか？')) return;
+  document.getElementById('createType').value    = '';
+  document.getElementById('createTitle').value   = '';
+  document.getElementById('createDate').value    = '';
+  document.getElementById('createPlace').value   = '';
+  document.getElementById('createBody').value    = '';
+  document.getElementById('createContact').value = '';
+  document.getElementById('createShop').value    = '';
+  document.getElementById('createPreviewFrame').style.display = 'none';
+  document.getElementById('createPlaceholder').style.display  = 'flex';
+  document.getElementById('createActionBar').style.display    = 'none';
+  createdChirashiHTML = '';
+  closeModal('settingsModal');
+}
+
+function saveConfirmSetting() {
+  const val = document.getElementById('confirmToggle').checked ? '1' : '0';
+  localStorage.setItem('chirashi_confirm', val);
+}
+
+function needsConfirm() {
+  return localStorage.getItem('chirashi_confirm') === '1';
+}
+
+// ========== モード切替 ==========
+function switchMode(mode) {
+  const convertEls = ['convertCatch', 'uploadCard', 'loadingCard', 'resultCard'];
+  const createEls = ['createCard'];
+
+  if (mode === 'convert') {
+    document.getElementById('modeTabConvert').classList.add('active');
+    document.getElementById('modeTabCreate').classList.remove('active');
+    convertEls.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = '';
+    });
+    document.getElementById('createCard').style.display = 'none';
+  } else {
+    document.getElementById('modeTabCreate').classList.add('active');
+    document.getElementById('modeTabConvert').classList.remove('active');
+    convertEls.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    document.getElementById('createCard').style.display = 'block';
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ========== チラシ作成 ==========
+let createdChirashiHTML = '';
+
+async function createChirashi() {
+  // パスワードゲートチェック
+  if (!isUnlocked()) {
+    if (getUses() >= FREE_LIMIT) { showGate(); return; }
+    addUse();
+    updateFreeCounter();
+  }
+
+  const type    = document.getElementById('createType').value;
+  const title   = document.getElementById('createTitle').value;
+  const date    = document.getElementById('createDate').value;
+  const place   = document.getElementById('createPlace').value;
+  const body    = document.getElementById('createBody').value;
+  const contact = document.getElementById('createContact').value;
+  const shop    = document.getElementById('createShop').value;
+
+  if (!title && !body) {
+    alert('タイトルまたは内容を入力してください');
+    return;
+  }
+
+  document.getElementById('createPlaceholder').style.display = 'none';
+  document.getElementById('createLoading').style.display = 'block';
+  document.getElementById('createPreviewFrame').style.display = 'none';
+  document.getElementById('createActionBar').style.display = 'none';
+  document.getElementById('createBtn').disabled = true;
+
+  const prompt = `
+あなたはプロのチラシデザイナーです。
+以下の情報をもとに、印刷・配布できる美しいHTMLチラシを1枚作成してください。
+
+チラシの種類：${type || '一般'}
+タイトル：${title || ''}
+日時・期間：${date || ''}
+場所：${place || ''}
+内容：${body || ''}
+問い合わせ：${contact || ''}
+店名・会社名：${shop || ''}
+
+要件：
+・完全なHTMLファイルとして出力（<!DOCTYPE html>から始まる）
+・A4サイズ（210mm×297mm）を想定したデザイン
+・インラインCSSで美しいデザインを作成
+・日本語フォント（Noto Sans JP）を使用
+・見やすい色使い・レイアウト
+・印刷時にも映えるデザイン
+・情報が入っていない項目は表示しない
+・HTMLコードのみを出力し、説明文は不要
+
+必ずHTMLコードだけを返してください。\`\`\`などのマークダウンは不要です。
+`;
+
+  try {
+    const response = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 8192,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Worker error: ' + response.status);
+    }
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message || 'API error');
+    }
+
+    let html = data.content.map(b => b.text || '').join('');
+    // マークダウンのコードブロックを除去
+    html = html.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+
+    // HTMLが不完全な場合のフォールバック
+    if (!html.includes('<html') && !html.includes('<!DOCTYPE')) {
+      html = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">
+      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+      <style>body{font-family:'Noto Sans JP',sans-serif;margin:0;padding:20px;}</style></head>
+      <body>${html}</body></html>`;
+    }
+
+    createdChirashiHTML = html;
+
+    const frame = document.getElementById('createPreviewFrame');
+    frame.style.display = 'block';
+    frame.style.minHeight = '500px';
+    const doc = frame.contentDocument || frame.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    // iframeの高さをコンテンツに合わせる
+    setTimeout(() => {
+      try {
+        const h = doc.body.scrollHeight;
+        if (h > 300) frame.style.minHeight = h + 'px';
+      } catch(e) {}
+    }, 500);
+
+    document.getElementById('createLoading').style.display = 'none';
+    document.getElementById('createActionBar').style.display = 'flex';
+
+  } catch (e) {
+    document.getElementById('createLoading').style.display = 'none';
+    document.getElementById('createPlaceholder').style.display = 'flex';
+    alert('エラーが発生しました。もう一度お試しください。\n' + e.message);
+  }
+
+  document.getElementById('createBtn').disabled = false;
+}
+
+function downloadChirashiHTML() {
+  if (!createdChirashiHTML) return;
+  const title = document.getElementById('createTitle').value || 'チラシ';
+  const blob = new Blob([createdChirashiHTML], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${title}_チラシ.html`;
+  a.click();
+}
+
+async function downloadChirashiPNG() {
+  if (!createdChirashiHTML) return;
+  const frame = document.getElementById('createPreviewFrame');
+  try {
+    const { default: html2canvas } = await import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js');
+    const canvas = await html2canvas(frame.contentDocument.body, { scale: 2, useCORS: true });
+    const a = document.createElement('a');
+    const title = document.getElementById('createTitle').value || 'チラシ';
+    a.download = `${title}_チラシ.png`;
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  } catch(e) {
+    alert('PNG保存はHTMLで保存後、ブラウザの印刷機能（PDFで保存）をご利用ください。');
+  }
+}
+
 // ========== パスワードゲート設定 ==========
 const GATE_KEY    = 'chirashi_unlocked';
 const FREE_KEY    = 'chirashi_uses';
@@ -1199,6 +2147,9 @@ function countChars(id, countId) {
 async function generate() {
   if (!imageBase64) return;
 
+  // 実行確認
+  if (needsConfirm() && !confirm('AIでコンテンツを生成しますか？')) return;
+
   // パスワードゲートチェック
   if (!isUnlocked()) {
     if (getUses() >= FREE_LIMIT) {
@@ -1311,6 +2262,14 @@ function renderResult(r) {
   document.getElementById('txt-web-summary').textContent = webSummary;
   document.getElementById('txt-web-body').textContent = r.web.body;
   document.getElementById('txt-web-html').textContent = r.web.html_snippet;
+  // HTMLプレビュー自動更新
+  setTimeout(() => {
+    const frame = document.getElementById('htmlPreviewFrame');
+    const doc = frame.contentDocument || frame.contentWindow.document;
+    doc.open();
+    doc.write(r.web.html_snippet);
+    doc.close();
+  }, 200);
 }
 
 function downloadAll() {
@@ -1339,6 +2298,15 @@ function downloadAll() {
   a.href = URL.createObjectURL(blob);
   a.download = `チラシみっけ_${new Date().toLocaleDateString('ja-JP')}.txt`;
   a.click();
+}
+
+function refreshPreview() {
+  const html = document.getElementById('txt-web-html').textContent;
+  const frame = document.getElementById('htmlPreviewFrame');
+  const doc = frame.contentDocument || frame.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
 }
 
 function resetAll() {
