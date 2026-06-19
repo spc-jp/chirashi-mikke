@@ -1283,14 +1283,105 @@ main {
 
 .create-loading {
   display: none;
-  text-align: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+  background: linear-gradient(160deg, #0D1117 0%, #1a2d5a 100%);
+  border-radius: 10px;
   padding: 40px 20px;
-  color: var(--muted);
-  font-size: 13px;
+  gap: 28px;
 }
 
-.create-loading .loading-spinner {
-  margin: 0 auto 12px;
+/* デザインアニメーション */
+.design-anim {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.design-anim-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  animation: designSpin 1.4s linear infinite;
+}
+
+.design-anim-ring:nth-child(1) {
+  border-top-color: #D0A900;
+  animation-duration: 1.4s;
+}
+
+.design-anim-ring:nth-child(2) {
+  inset: 10px;
+  border-right-color: #0066CC;
+  animation-duration: 1.0s;
+  animation-direction: reverse;
+}
+
+.design-anim-ring:nth-child(3) {
+  inset: 22px;
+  border-bottom-color: rgba(255,255,255,0.5);
+  animation-duration: 0.7s;
+}
+
+.design-anim-center {
+  position: absolute;
+  inset: 30px;
+  background: #D0A900;
+  border-radius: 50%;
+  animation: designPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes designSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes designPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.7); opacity: 0.6; }
+}
+
+.design-anim-text {
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.design-anim-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 220px;
+}
+
+.design-anim-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  transition: all 0.4s;
+}
+
+.design-anim-step.active {
+  color: #D0A900;
+}
+
+.design-anim-step.done {
+  color: rgba(255,255,255,0.7);
+}
+
+.design-step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
 }
 
 @media (max-width: 600px) {
@@ -1559,8 +1650,19 @@ main {
             <div>情報を入力して生成ボタンを押すと<br>ここにチラシが表示されます</div>
           </div>
           <div class="create-loading" id="createLoading">
-            <div class="loading-spinner"></div>
-            AIがデザイン中です...
+            <div class="design-anim">
+              <div class="design-anim-ring"></div>
+              <div class="design-anim-ring"></div>
+              <div class="design-anim-ring"></div>
+              <div class="design-anim-center"></div>
+            </div>
+            <div class="design-anim-text">AIがチラシをデザイン中...</div>
+            <div class="design-anim-steps">
+              <div class="design-anim-step" id="ds1"><div class="design-step-dot"></div>情報を読み取り中</div>
+              <div class="design-anim-step" id="ds2"><div class="design-step-dot"></div>レイアウトを設計中</div>
+              <div class="design-anim-step" id="ds3"><div class="design-step-dot"></div>デザインを生成中</div>
+              <div class="design-anim-step" id="ds4"><div class="design-step-dot"></div>仕上げ処理中</div>
+            </div>
           </div>
           <iframe id="createPreviewFrame"></iframe>
         </div>
@@ -1833,35 +1935,74 @@ async function createChirashi() {
   }
 
   document.getElementById('createPlaceholder').style.display = 'none';
-  document.getElementById('createLoading').style.display = 'block';
+  document.getElementById('createLoading').style.display = 'flex';
   document.getElementById('createPreviewFrame').style.display = 'none';
   document.getElementById('createActionBar').style.display = 'none';
   document.getElementById('createBtn').disabled = true;
 
-  const prompt = `
-あなたはプロのチラシデザイナーです。
-以下の情報をもとに、印刷・配布できる美しいHTMLチラシを1枚作成してください。
+  // デザインアニメーションステップ
+  const dsSteps = ['ds1','ds2','ds3','ds4'];
+  dsSteps.forEach(s => document.getElementById(s).className = 'design-anim-step');
+  document.getElementById('ds1').classList.add('active');
+  let dsIdx = 0;
+  const dsTimer = setInterval(() => {
+    if (dsIdx < dsSteps.length - 1) {
+      document.getElementById(dsSteps[dsIdx]).classList.remove('active');
+      document.getElementById(dsSteps[dsIdx]).classList.add('done');
+      dsIdx++;
+      document.getElementById(dsSteps[dsIdx]).classList.add('active');
+    }
+  }, 1800);
 
-チラシの種類：${type || '一般'}
+  const colorScheme = {
+    'イベント・セール':     { bg: '#1a1a2e', accent: '#e94560', sub: '#f5a623', text: '#ffffff' },
+    '新メニュー・新商品':   { bg: '#1b4332', accent: '#40916c', sub: '#d8f3dc', text: '#ffffff' },
+    'キャンペーン・割引':   { bg: '#7b2d8b', accent: '#f72585', sub: '#fee440', text: '#ffffff' },
+    '会社案内・サービス紹介': { bg: '#03045e', accent: '#0077b6', sub: '#90e0ef', text: '#ffffff' },
+    '採用・求人':           { bg: '#2d3748', accent: '#f6ad55', sub: '#63b3ed', text: '#ffffff' },
+    '開店・移転のお知らせ': { bg: '#744210', accent: '#f6e05e', sub: '#fc8181', text: '#ffffff' },
+    '季節のご挨拶':         { bg: '#4a1942', accent: '#f687b3', sub: '#fbd38d', text: '#ffffff' },
+    '地域・町内会のお知らせ': { bg: '#1a365d', accent: '#63b3ed', sub: '#68d391', text: '#ffffff' },
+    '税理士・士業のご案内': { bg: '#1c3a5e', accent: '#3182ce', sub: '#d0a900', text: '#ffffff' },
+    'その他':               { bg: '#2d3748', accent: '#667eea', sub: '#f687b3', text: '#ffffff' },
+  };
+  const cs = colorScheme[type] || colorScheme['その他'];
+
+  const prompt = `あなたは世界トップクラスのグラフィックデザイナーです。
+以下の情報をもとに、プロ品質の美しいHTMLチラシを作成してください。
+
+【チラシ情報】
+種類：${type || 'イベント'}
 タイトル：${title || ''}
-日時・期間：${date || ''}
+日時：${date || ''}
 場所：${place || ''}
 内容：${body || ''}
 問い合わせ：${contact || ''}
-店名・会社名：${shop || ''}
+主催・店名：${shop || ''}
 
-要件：
-・完全なHTMLファイルとして出力（<!DOCTYPE html>から始まる）
-・A4サイズ（210mm×297mm）を想定したデザイン
-・インラインCSSで美しいデザインを作成
-・日本語フォント（Noto Sans JP）を使用
-・見やすい色使い・レイアウト
-・印刷時にも映えるデザイン
-・情報が入っていない項目は表示しない
-・HTMLコードのみを出力し、説明文は不要
+【カラースキーム】
+背景色：${cs.bg}
+アクセント：${cs.accent}
+サブカラー：${cs.sub}
+テキスト：${cs.text}
 
-必ずHTMLコードだけを返してください。\`\`\`などのマークダウンは不要です。
-`;
+【デザイン要件】
+- 完全なHTMLファイルとして出力（<!DOCTYPE html>から始まる）
+- 縦長A4比率（幅595px、高さ842px固定）をbodyに設定
+- Google Fonts（Noto Sans JP）を必ずlinkタグで読み込む
+- 全スタイルはstyleタグ内のCSSで記述（インラインCSSは最小限に）
+- 以下のデザイン要素を必ず使用すること：
+  * ヘッダー部分：背景色${cs.bg}で全幅カバー、白いタイトル文字
+  * タイトルは特大フォント（48px以上）、インパクト重視
+  * 装飾的な幾何学図形（円・三角・斜線など）をCSSで生成
+  * 情報エリア：アイコン絵文字＋テキストの組み合わせ
+  * 区切り線・バッジ・タグなどの装飾要素を積極的に使う
+  * フッター：問い合わせ先を目立つボックスで囲む
+  * グラデーション・影・丸角を積極的に活用
+- 空白・余白のバランスを意識したプロの紙面設計
+- 情報が空の項目は表示しない
+- 印刷時も映える高コントラストデザイン
+- HTMLとCSSコードのみを返す。説明文・マークダウン不要。`;
 
   try {
     const response = await fetch(WORKER_URL, {
@@ -1918,6 +2059,7 @@ async function createChirashi() {
     document.getElementById('createActionBar').style.display = 'flex';
 
   } catch (e) {
+    clearInterval(dsTimer);
     document.getElementById('createLoading').style.display = 'none';
     document.getElementById('createPlaceholder').style.display = 'flex';
     alert('エラーが発生しました。もう一度お試しください。\n' + e.message);
