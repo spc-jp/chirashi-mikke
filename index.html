@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>チラシみっけ｜チラシをAIがWeb・SNSコンテンツに変換</title>
+<link rel="icon" href="https://chirashi-mikke.pages.dev/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="https://chirashi-mikke.pages.dev/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1153,12 +1155,25 @@ main {
 }
 
 .create-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
-.create-form {}
+.create-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.create-form .form-group-full {
+  grid-column: 1 / -1;
+}
+
+.create-form .form-group-half {
+  grid-column: span 1;
+}
 
 .form-group {
   margin-bottom: 16px;
@@ -1202,23 +1217,25 @@ main {
 }
 
 .create-preview-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  color: var(--muted);
-  letter-spacing: 0.08em;
+  color: var(--text);
+  letter-spacing: 0.05em;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary);
 }
 
 .create-preview-frame-wrap {
-  flex: 1;
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   background: var(--bg);
-  min-height: 500px;
+  min-height: 600px;
   position: relative;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
 }
 
 .create-preview-placeholder {
@@ -1237,7 +1254,7 @@ main {
 
 #createPreviewFrame {
   width: 100%;
-  min-height: 500px;
+  min-height: 842px;
   border: none;
   display: none;
   transition: min-height 0.3s;
@@ -1387,7 +1404,7 @@ main {
 @media (max-width: 600px) {
   .genre-grid { grid-template-columns: repeat(3, 1fr); }
   .sns-grid { grid-template-columns: 1fr; }
-  .create-layout { grid-template-columns: 1fr; }
+  .create-form { grid-template-columns: 1fr; }
   .mode-tab { font-size: 12px; padding: 10px 8px; }
 }
 </style>
@@ -1395,7 +1412,7 @@ main {
 <body>
 
 <header>
-  <div class="header-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <div class="header-logo" onclick="goHome()">
     <div class="logo-icon">📄</div>
     <div class="logo-text-wrap">
       <div class="logo-text">チラシ<span>みっけ</span></div>
@@ -1535,20 +1552,20 @@ main {
         業種を選択（任意）
       </div>
       <div class="genre-grid">
-        <button class="genre-btn" onclick="selectGenre(this, '飲食・カフェ')">
-          <span class="genre-icon">🍽️</span>飲食・カフェ
+        <button class="genre-btn" onclick="selectGenre(this, '製造業')">
+          <span class="genre-icon">🏭</span>製造業
         </button>
-        <button class="genre-btn" onclick="selectGenre(this, '美容・サロン')">
-          <span class="genre-icon">💄</span>美容・サロン
+        <button class="genre-btn" onclick="selectGenre(this, '卸・問屋')">
+          <span class="genre-icon">📦</span>卸・問屋
         </button>
         <button class="genre-btn" onclick="selectGenre(this, '小売・物販')">
           <span class="genre-icon">🛍️</span>小売・物販
         </button>
-        <button class="genre-btn" onclick="selectGenre(this, 'イベント・教室')">
-          <span class="genre-icon">🎪</span>イベント・教室
-        </button>
         <button class="genre-btn" onclick="selectGenre(this, '医療・整体')">
           <span class="genre-icon">🏥</span>医療・整体
+        </button>
+        <button class="genre-btn" onclick="selectGenre(this, 'イベント・教室')">
+          <span class="genre-icon">🎪</span>イベント・教室
         </button>
         <button class="genre-btn" onclick="selectGenre(this, '不動産・工務店')">
           <span class="genre-icon">🏠</span>不動産・工務店
@@ -1556,8 +1573,11 @@ main {
         <button class="genre-btn" onclick="selectGenre(this, '士業・税理士')">
           <span class="genre-icon">⚖️</span>士業・税理士
         </button>
-        <button class="genre-btn" onclick="selectGenre(this, '製造・B2B')">
-          <span class="genre-icon">🏭</span>製造・B2B
+        <button class="genre-btn" onclick="selectGenre(this, '美容・サロン')">
+          <span class="genre-icon">💄</span>美容・サロン
+        </button>
+        <button class="genre-btn" onclick="selectGenre(this, '飲食・カフェ')">
+          <span class="genre-icon">🍽️</span>飲食・カフェ
         </button>
         <button class="genre-btn" onclick="selectGenre(this, 'リフォーム')">
           <span class="genre-icon">🔨</span>リフォーム
@@ -1585,9 +1605,10 @@ main {
     </div>
 
     <div class="create-layout">
-      <!-- 入力フォーム -->
+
+      <!-- 上：入力フォーム（3カラムグリッド） -->
       <div class="create-form">
-        <div class="form-group">
+        <div class="form-group form-group-half">
           <label class="form-label">チラシの種類</label>
           <select class="form-select" id="createType">
             <option value="">選択してください</option>
@@ -1600,54 +1621,54 @@ main {
             <option value="季節のご挨拶">🌸 季節のご挨拶</option>
             <option value="地域・町内会のお知らせ">📋 地域・町内会のお知らせ</option>
             <option value="税理士・士業のご案内">⚖️ 税理士・士業のご案内</option>
+            <option value="製造業・技術紹介">🏭 製造業・技術紹介</option>
+            <option value="卸・問屋のご案内">📦 卸・問屋のご案内</option>
             <option value="その他">📄 その他</option>
           </select>
         </div>
-
-        <div class="form-group">
-          <label class="form-label">タイトル・イベント名</label>
-          <input class="form-input" id="createTitle" type="text" placeholder="例：夏の大感謝セール、新メニュー登場">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">日時・期間</label>
-          <input class="form-input" id="createDate" type="text" placeholder="例：2025年7月1日（火）〜7月31日（木）">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">場所・住所</label>
-          <input class="form-input" id="createPlace" type="text" placeholder="例：〇〇市〇〇町1-2-3 / オンライン">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">内容・説明（自由記入）</label>
-          <textarea class="form-textarea" id="createBody" placeholder="例：全品20%OFF！ドリンク無料サービスあり。お子様連れ大歓迎。"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">問い合わせ先・URL・電話番号</label>
-          <input class="form-input" id="createContact" type="text" placeholder="例：Tel.048-000-0000 / https://example.com">
-        </div>
-
-        <div class="form-group">
+        <div class="form-group form-group-half">
           <label class="form-label">店名・会社名</label>
           <input class="form-input" id="createShop" type="text" placeholder="例：スマイルプラスコンサルティング">
         </div>
-
-        <button class="btn-generate" id="createBtn" onclick="createChirashi()" style="margin-top:8px;">
-          ✨ AIでチラシを生成する
-        </button>
+        <div class="form-group form-group-half">
+          <label class="form-label">問い合わせ先・TEL・URL</label>
+          <input class="form-input" id="createContact" type="text" placeholder="例：Tel.048-000-0000">
+        </div>
+        <div class="form-group form-group-full">
+          <label class="form-label">タイトル・イベント名</label>
+          <input class="form-input" id="createTitle" type="text" placeholder="例：夏の大感謝セール、新メニュー登場">
+        </div>
+        <div class="form-group form-group-half">
+          <label class="form-label">日時・期間</label>
+          <input class="form-input" id="createDate" type="text" placeholder="例：2025年7月1日〜7月31日">
+        </div>
+        <div class="form-group form-group-half">
+          <label class="form-label">場所・住所</label>
+          <input class="form-input" id="createPlace" type="text" placeholder="例：〇〇市〇〇町1-2-3">
+        </div>
+        <div class="form-group form-group-full" style="grid-column:span 1;">
+          <!-- 空白 -->
+        </div>
+        <div class="form-group form-group-full">
+          <label class="form-label">内容・説明</label>
+          <textarea class="form-textarea" id="createBody" placeholder="例：全品20%OFF！ドリンク無料サービスあり。お子様連れ大歓迎。"></textarea>
+        </div>
+        <div class="form-group form-group-full">
+          <button class="btn-generate" id="createBtn" onclick="createChirashi()">
+            ✨ AIでチラシを生成する
+          </button>
+        </div>
       </div>
 
-      <!-- プレビューエリア -->
+      <!-- 下：プレビューエリア（大きく表示） -->
       <div class="create-preview-area">
         <div class="create-preview-label">
-          🖼️ プレビュー
+          🖼️ チラシプレビュー（生成後に表示されます）
         </div>
         <div class="create-preview-frame-wrap">
           <div class="create-preview-placeholder" id="createPlaceholder">
             <div class="create-preview-placeholder-icon">📄</div>
-            <div>情報を入力して生成ボタンを押すと<br>ここにチラシが表示されます</div>
+            <div>上のフォームに情報を入力して<br>「AIでチラシを生成する」を押してください</div>
           </div>
           <div class="create-loading" id="createLoading">
             <div class="design-anim">
@@ -1669,8 +1690,10 @@ main {
         <div class="create-action-bar" id="createActionBar" style="display:none;">
           <button class="btn-create-dl btn-dl-html" onclick="downloadChirashiHTML()">📄 HTMLで保存（印刷用）</button>
           <button class="btn-create-dl btn-dl-png" onclick="downloadChirashiPNG()">🖼️ 画像で保存（PNG）</button>
+          <button class="btn-create-dl" style="background:var(--white);color:var(--text);border:1px solid var(--border);" onclick="resetCreate()">← 戻る</button>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -1785,7 +1808,7 @@ main {
 
     <div class="action-bar">
       <button class="btn-action btn-action-primary" onclick="downloadAll()">📥 全文テキストを保存</button>
-      <button class="btn-action btn-action-outline" onclick="resetAll()">🔄 別のチラシを読み込む</button>
+      <button class="btn-action btn-action-outline" onclick="resetAll()">← 戻る</button>
     </div>
   </div>
 
@@ -1912,100 +1935,130 @@ function switchMode(mode) {
 
 // ========== チラシ作成 ==========
 let createdChirashiHTML = '';
+let dsTimer = null;
 
-async function createChirashi() {
-  // パスワードゲートチェック
-  if (!isUnlocked()) {
-    if (getUses() >= FREE_LIMIT) { showGate(); return; }
-    addUse();
-    updateFreeCounter();
-  }
-
-  const type    = document.getElementById('createType').value;
-  const title   = document.getElementById('createTitle').value;
-  const date    = document.getElementById('createDate').value;
-  const place   = document.getElementById('createPlace').value;
-  const body    = document.getElementById('createBody').value;
-  const contact = document.getElementById('createContact').value;
-  const shop    = document.getElementById('createShop').value;
-
-  if (!title && !body) {
-    alert('タイトルまたは内容を入力してください');
-    return;
-  }
-
-  document.getElementById('createPlaceholder').style.display = 'none';
-  document.getElementById('createLoading').style.display = 'flex';
-  document.getElementById('createPreviewFrame').style.display = 'none';
-  document.getElementById('createActionBar').style.display = 'none';
-  document.getElementById('createBtn').disabled = true;
-
-  // デザインアニメーションステップ
+function startDesignAnim() {
   const dsSteps = ['ds1','ds2','ds3','ds4'];
-  dsSteps.forEach(s => document.getElementById(s).className = 'design-anim-step');
-  document.getElementById('ds1').classList.add('active');
+  dsSteps.forEach(s => {
+    const el = document.getElementById(s);
+    if (el) el.className = 'design-anim-step';
+  });
+  const el0 = document.getElementById('ds1');
+  if (el0) el0.classList.add('active');
   let dsIdx = 0;
-  const dsTimer = setInterval(() => {
+  if (dsTimer) clearInterval(dsTimer);
+  dsTimer = setInterval(() => {
     if (dsIdx < dsSteps.length - 1) {
-      document.getElementById(dsSteps[dsIdx]).classList.remove('active');
-      document.getElementById(dsSteps[dsIdx]).classList.add('done');
+      const cur = document.getElementById(dsSteps[dsIdx]);
+      if (cur) { cur.classList.remove('active'); cur.classList.add('done'); }
       dsIdx++;
-      document.getElementById(dsSteps[dsIdx]).classList.add('active');
+      const nxt = document.getElementById(dsSteps[dsIdx]);
+      if (nxt) nxt.classList.add('active');
     }
   }, 1800);
+}
 
-  const colorScheme = {
-    'イベント・セール':     { bg: '#1a1a2e', accent: '#e94560', sub: '#f5a623', text: '#ffffff' },
-    '新メニュー・新商品':   { bg: '#1b4332', accent: '#40916c', sub: '#d8f3dc', text: '#ffffff' },
-    'キャンペーン・割引':   { bg: '#7b2d8b', accent: '#f72585', sub: '#fee440', text: '#ffffff' },
-    '会社案内・サービス紹介': { bg: '#03045e', accent: '#0077b6', sub: '#90e0ef', text: '#ffffff' },
-    '採用・求人':           { bg: '#2d3748', accent: '#f6ad55', sub: '#63b3ed', text: '#ffffff' },
-    '開店・移転のお知らせ': { bg: '#744210', accent: '#f6e05e', sub: '#fc8181', text: '#ffffff' },
-    '季節のご挨拶':         { bg: '#4a1942', accent: '#f687b3', sub: '#fbd38d', text: '#ffffff' },
-    '地域・町内会のお知らせ': { bg: '#1a365d', accent: '#63b3ed', sub: '#68d391', text: '#ffffff' },
-    '税理士・士業のご案内': { bg: '#1c3a5e', accent: '#3182ce', sub: '#d0a900', text: '#ffffff' },
-    'その他':               { bg: '#2d3748', accent: '#667eea', sub: '#f687b3', text: '#ffffff' },
-  };
-  const cs = colorScheme[type] || colorScheme['その他'];
+function stopDesignAnim() {
+  if (dsTimer) { clearInterval(dsTimer); dsTimer = null; }
+  ['ds1','ds2','ds3','ds4'].forEach(s => {
+    const el = document.getElementById(s);
+    if (el) { el.classList.remove('active'); el.classList.add('done'); }
+  });
+}
 
-  const prompt = `あなたは世界トップクラスのグラフィックデザイナーです。
-以下の情報をもとに、プロ品質の美しいHTMLチラシを作成してください。
+function showCreateLoading() {
+  const pl = document.getElementById('createPlaceholder');
+  const ld = document.getElementById('createLoading');
+  const fr = document.getElementById('createPreviewFrame');
+  const ab = document.getElementById('createActionBar');
+  const btn = document.getElementById('createBtn');
+  if (pl) pl.style.display = 'none';
+  if (ld) ld.style.display = 'flex';
+  if (fr) fr.style.display = 'none';
+  if (ab) ab.style.display = 'none';
+  if (btn) btn.disabled = true;
+}
 
-【チラシ情報】
-種類：${type || 'イベント'}
-タイトル：${title || ''}
-日時：${date || ''}
-場所：${place || ''}
-内容：${body || ''}
-問い合わせ：${contact || ''}
-主催・店名：${shop || ''}
+function hideCreateLoading() {
+  const ld = document.getElementById('createLoading');
+  const btn = document.getElementById('createBtn');
+  if (ld) ld.style.display = 'none';
+  if (btn) btn.disabled = false;
+}
 
-【カラースキーム】
-背景色：${cs.bg}
-アクセント：${cs.accent}
-サブカラー：${cs.sub}
-テキスト：${cs.text}
+function showCreateError(msg) {
+  hideCreateLoading();
+  stopDesignAnim();
+  const pl = document.getElementById('createPlaceholder');
+  if (pl) pl.style.display = 'flex';
+  alert('エラーが発生しました。\n' + (msg || 'もう一度お試しください。'));
+}
 
-【デザイン要件】
-- 完全なHTMLファイルとして出力（<!DOCTYPE html>から始まる）
-- 縦長A4比率（幅595px、高さ842px固定）をbodyに設定
-- Google Fonts（Noto Sans JP）を必ずlinkタグで読み込む
-- 全スタイルはstyleタグ内のCSSで記述（インラインCSSは最小限に）
-- 以下のデザイン要素を必ず使用すること：
-  * ヘッダー部分：背景色${cs.bg}で全幅カバー、白いタイトル文字
-  * タイトルは特大フォント（48px以上）、インパクト重視
-  * 装飾的な幾何学図形（円・三角・斜線など）をCSSで生成
-  * 情報エリア：アイコン絵文字＋テキストの組み合わせ
-  * 区切り線・バッジ・タグなどの装飾要素を積極的に使う
-  * フッター：問い合わせ先を目立つボックスで囲む
-  * グラデーション・影・丸角を積極的に活用
-- 空白・余白のバランスを意識したプロの紙面設計
-- 情報が空の項目は表示しない
-- 印刷時も映える高コントラストデザイン
-- HTMLとCSSコードのみを返す。説明文・マークダウン不要。`;
-
+async function createChirashi() {
   try {
-    const response = await fetch(WORKER_URL, {
+    // パスワードゲートチェック
+    if (!isUnlocked()) {
+      if (getUses() >= FREE_LIMIT) { showGate(); return; }
+      addUse();
+      try { updateFreeCounter(); } catch(e) {}
+    }
+
+    const type    = (document.getElementById('createType')    || {}).value || '';
+    const title   = (document.getElementById('createTitle')   || {}).value || '';
+    const date    = (document.getElementById('createDate')    || {}).value || '';
+    const place   = (document.getElementById('createPlace')   || {}).value || '';
+    const body    = (document.getElementById('createBody')    || {}).value || '';
+    const contact = (document.getElementById('createContact') || {}).value || '';
+    const shop    = (document.getElementById('createShop')    || {}).value || '';
+
+    if (!title && !body) {
+      alert('タイトルまたは内容を入力してください');
+      return;
+    }
+
+    showCreateLoading();
+    startDesignAnim();
+
+    const colorScheme = {
+      'イベント・セール':       { bg: '#1a1a2e', accent: '#e94560', sub: '#f5a623' },
+      '新メニュー・新商品':     { bg: '#1b4332', accent: '#40916c', sub: '#d8f3dc' },
+      'キャンペーン・割引':     { bg: '#7b2d8b', accent: '#f72585', sub: '#fee440' },
+      '会社案内・サービス紹介': { bg: '#03045e', accent: '#0077b6', sub: '#90e0ef' },
+      '採用・求人':             { bg: '#2d3748', accent: '#f6ad55', sub: '#63b3ed' },
+      '開店・移転のお知らせ':   { bg: '#744210', accent: '#f6e05e', sub: '#fc8181' },
+      '季節のご挨拶':           { bg: '#4a1942', accent: '#f687b3', sub: '#fbd38d' },
+      '地域・町内会のお知らせ': { bg: '#1a365d', accent: '#63b3ed', sub: '#68d391' },
+      '税理士・士業のご案内':   { bg: '#1c3a5e', accent: '#3182ce', sub: '#d0a900' },
+      '製造業・技術紹介':       { bg: '#1c2b3a', accent: '#4a9eff', sub: '#f0a500' },
+      '卸・問屋のご案内':       { bg: '#1a2f1a', accent: '#48bb78', sub: '#f6e05e' },
+    };
+    const cs = colorScheme[type] || { bg: '#2d3748', accent: '#667eea', sub: '#f687b3' };
+
+    const prompt = `あなたは世界トップクラスのグラフィックデザイナーです。以下の情報をもとにプロ品質の美しいHTMLチラシを1枚作成してください。
+
+チラシの種類：${type || 'イベント'}
+タイトル：${title}
+日時：${date}
+場所：${place}
+内容：${body}
+問い合わせ：${contact}
+主催・店名：${shop}
+背景色：${cs.bg} / アクセント：${cs.accent} / サブ：${cs.sub}
+
+要件：
+・完全なHTMLファイルで出力（<!DOCTYPE html>から始める）
+・縦長A4（幅595px、高さ842px）をbodyに設定
+・Noto Sans JPをGoogle Fontsから読み込む
+・インラインCSSで全スタイル完結させる
+・ヘッダー：${cs.bg}背景で全幅、白い大きなタイトル文字（48px以上）
+・幾何学的な装飾図形（円・斜線など）をCSSで追加
+・情報エリア：絵文字アイコン＋テキスト
+・フッター：問い合わせ先をボックスで囲む
+・グラデーション・影・丸角を積極活用
+・空の項目は非表示
+・HTMLコードのみ返す。説明文・マークダウン不要。`;
+
+    const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -2015,57 +2068,42 @@ async function createChirashi() {
       })
     });
 
-    if (!response.ok) {
-      throw new Error('Worker error: ' + response.status);
-    }
+    if (!res.ok) throw new Error('通信エラー: ' + res.status);
 
-    const data = await response.json();
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message || 'APIエラー');
 
-    if (data.error) {
-      throw new Error(data.error.message || 'API error');
-    }
+    let html = (data.content || []).map(b => b.text || '').join('');
+    html = html.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
 
-    let html = data.content.map(b => b.text || '').join('');
-    // マークダウンのコードブロックを除去
-    html = html.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-
-    // HTMLが不完全な場合のフォールバック
-    if (!html.includes('<html') && !html.includes('<!DOCTYPE')) {
-      html = `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
-      <style>body{font-family:'Noto Sans JP',sans-serif;margin:0;padding:20px;}</style></head>
-      <body>${html}</body></html>`;
-    }
+    if (!html || html.length < 100) throw new Error('HTMLの生成に失敗しました');
 
     createdChirashiHTML = html;
+    stopDesignAnim();
+    hideCreateLoading();
 
     const frame = document.getElementById('createPreviewFrame');
-    frame.style.display = 'block';
-    frame.style.minHeight = '500px';
-    const doc = frame.contentDocument || frame.contentWindow.document;
-    doc.open();
-    doc.write(html);
-    doc.close();
+    if (frame) {
+      frame.style.display = 'block';
+      frame.style.minHeight = '500px';
+      const doc = frame.contentDocument || frame.contentWindow.document;
+      doc.open();
+      doc.write(html);
+      doc.close();
+      setTimeout(() => {
+        try {
+          const h = doc.body.scrollHeight;
+          if (h > 300) frame.style.minHeight = h + 20 + 'px';
+        } catch(e) {}
+      }, 600);
+    }
 
-    // iframeの高さをコンテンツに合わせる
-    setTimeout(() => {
-      try {
-        const h = doc.body.scrollHeight;
-        if (h > 300) frame.style.minHeight = h + 'px';
-      } catch(e) {}
-    }, 500);
+    const ab = document.getElementById('createActionBar');
+    if (ab) ab.style.display = 'flex';
 
-    document.getElementById('createLoading').style.display = 'none';
-    document.getElementById('createActionBar').style.display = 'flex';
-
-  } catch (e) {
-    clearInterval(dsTimer);
-    document.getElementById('createLoading').style.display = 'none';
-    document.getElementById('createPlaceholder').style.display = 'flex';
-    alert('エラーが発生しました。もう一度お試しください。\n' + e.message);
+  } catch(e) {
+    showCreateError(e.message);
   }
-
-  document.getElementById('createBtn').disabled = false;
 }
 
 function downloadChirashiHTML() {
@@ -2449,6 +2487,25 @@ function refreshPreview() {
   doc.open();
   doc.write(html);
   doc.close();
+}
+
+function goHome() {
+  resetAll();
+  resetCreate();
+  switchMode('convert');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetCreate() {
+  createdChirashiHTML = '';
+  const frame = document.getElementById('createPreviewFrame');
+  if (frame) frame.style.display = 'none';
+  const pl = document.getElementById('createPlaceholder');
+  if (pl) pl.style.display = 'flex';
+  const ab = document.getElementById('createActionBar');
+  if (ab) ab.style.display = 'none';
+  const ld = document.getElementById('createLoading');
+  if (ld) ld.style.display = 'none';
 }
 
 function resetAll() {
