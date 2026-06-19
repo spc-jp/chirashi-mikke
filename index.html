@@ -711,6 +711,98 @@ main {
   line-height: 1.6;
 }
 
+/* ===== 全幅チラシプレビューオーバーレイ ===== */
+.fullscreen-preview {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: #1a1a1a;
+  flex-direction: column;
+}
+
+.fullscreen-preview.show {
+  display: flex;
+}
+
+.fullscreen-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: #0D1117;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.fullscreen-preview-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fullscreen-preview-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.fullscreen-btn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+  border: none;
+  transition: all 0.15s;
+}
+
+.fullscreen-btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.fullscreen-btn-primary:hover { background: var(--primary-dark); }
+
+.fullscreen-btn-gold {
+  background: #D0A900;
+  color: white;
+}
+
+.fullscreen-btn-gold:hover { background: #b8920a; }
+
+.fullscreen-btn-close {
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.8);
+  padding: 8px 14px;
+}
+
+.fullscreen-btn-close:hover { background: rgba(255,255,255,0.2); }
+
+.fullscreen-preview-body {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  background: #2a2a2a;
+}
+
+.fullscreen-preview-body iframe {
+  width: 100%;
+  max-width: 900px;
+  height: 100%;
+  min-height: calc(100vh - 80px);
+  border: none;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+}
+
 /* ========== パスワードゲート ========== */
 .gate-overlay {
   display: none;
@@ -1215,12 +1307,6 @@ main {
   display: flex;
   flex-direction: column;
   gap: 0;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  width: 100vw;
   margin-top: 28px;
 }
 
@@ -1232,7 +1318,7 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 16px 32px;
+  padding: 16px 20px;
   border-top: 1px solid var(--border);
   background: var(--bg);
 }
@@ -1242,7 +1328,6 @@ main {
   background: #e8e8e8;
   min-height: 842px;
   position: relative;
-  box-shadow: inset 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .create-preview-placeholder {
@@ -2092,24 +2177,8 @@ async function createChirashi() {
     stopDesignAnim();
     hideCreateLoading();
 
-    const frame = document.getElementById('createPreviewFrame');
-    if (frame) {
-      frame.style.display = 'block';
-      frame.style.minHeight = '500px';
-      const doc = frame.contentDocument || frame.contentWindow.document;
-      doc.open();
-      doc.write(html);
-      doc.close();
-      setTimeout(() => {
-        try {
-          const h = doc.body.scrollHeight;
-          if (h > 300) frame.style.minHeight = h + 20 + 'px';
-        } catch(e) {}
-      }, 600);
-    }
-
-    const ab = document.getElementById('createActionBar');
-    if (ab) ab.style.display = 'flex';
+    // 全幅オーバーレイでプレビュー表示
+    showFullscreenPreview(html);
 
   } catch(e) {
     showCreateError(e.message);
@@ -2499,6 +2568,24 @@ function refreshPreview() {
   doc.close();
 }
 
+function showFullscreenPreview(html) {
+  const overlay = document.getElementById('fullscreenPreview');
+  const frame = document.getElementById('fullscreenPreviewFrame');
+  if (!overlay || !frame) return;
+  overlay.classList.add('show');
+  const doc = frame.contentDocument || frame.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
+  document.body.style.overflow = 'hidden';
+}
+
+function closeFullscreenPreview() {
+  const overlay = document.getElementById('fullscreenPreview');
+  if (overlay) overlay.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
 function goHome() {
   resetAll();
   resetCreate();
@@ -2508,6 +2595,7 @@ function goHome() {
 
 function resetCreate() {
   createdChirashiHTML = '';
+  closeFullscreenPreview();
   const frame = document.getElementById('createPreviewFrame');
   if (frame) frame.style.display = 'none';
   const pl = document.getElementById('createPlaceholder');
@@ -2533,5 +2621,22 @@ function resetAll() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
+<!-- 全幅チラシプレビューオーバーレイ -->
+<div class="fullscreen-preview" id="fullscreenPreview">
+  <div class="fullscreen-preview-header">
+    <div class="fullscreen-preview-title">
+      🎨 チラシプレビュー
+    </div>
+    <div class="fullscreen-preview-actions">
+      <button class="fullscreen-btn fullscreen-btn-primary" onclick="downloadChirashiHTML()">📄 HTMLで保存</button>
+      <button class="fullscreen-btn fullscreen-btn-gold" onclick="downloadChirashiPNG()">🖼️ 画像で保存</button>
+      <button class="fullscreen-btn fullscreen-btn-close" onclick="closeFullscreenPreview()">✕ 閉じる</button>
+    </div>
+  </div>
+  <div class="fullscreen-preview-body">
+    <iframe id="fullscreenPreviewFrame"></iframe>
+  </div>
+</div>
+
 </body>
 </html>
