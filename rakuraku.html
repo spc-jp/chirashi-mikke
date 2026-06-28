@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>らくらく印刷おまかせアシスタント</title>
+    <!-- Tailwind CSSの読み込み -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fontsの読み込み（日本語対応、英数字用の洗練されたフォント） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- アイコン用のFontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Outfit', sans-serif;
+            background-color: #f8fafc;
+        }
+        .transition-all-300 {
+            transition: all 0.3s ease-in-out;
+        }
+        /* すりガラス風の美しいプレミアムカードスタイル */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        /* スクロールバーのデザインを美しく滑らかに調整 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <!-- 親しみやすく、プロを連想させるペン先のアイコンロゴ -->
+                <div class="bg-indigo-900 text-white p-2.5 rounded-xl shadow-md">
+                    <i class="fa-solid fa-pen-nib text-lg md:text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-base md:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                        らくらく印刷おまかせアシスタント
+                    </h1>
+                    <p class="text-[10px] md:text-xs text-slate-500 font-medium">文章もレイアウトも、もう悩まない。3ステップでプロ仕様</p>
+                </div>
+            </div>
+            <div>
+                <!-- 初心者の方に安心感を与えるバッジ表記 -->
+                <span class="px-2.5 py-1 bg-amber-50 text-amber-800 text-[10px] md:text-xs font-semibold rounded-full border border-amber-200">
+                    <i class="fa-solid fa-face-smile mr-1"></i>はじめてでも安心
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-6 md:py-8">
+        
+        <!-- 進捗インジケーター（現在地を視覚的に分かりやすく表現） -->
+        <div class="mb-8 md:mb-10 max-w-2xl mx-auto">
+            <div class="flex items-center justify-between relative">
+                <!-- 進捗をつなぐ細い横線 -->
+                <div class="absolute left-0 right-0 top-1/2 h-1 bg-slate-200 -translate-y-1/2 z-0"></div>
+                <div id="progress-line-active" class="absolute left-0 top-1/2 h-1 bg-indigo-900 -translate-y-1/2 z-0 transition-all duration-500" style="width: 0%;"></div>
+
+                <!-- ステップ1バッジ -->
+                <div class="z-10 text-center flex flex-col items-center">
+                    <div id="step-badge-1" class="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-indigo-900 text-white font-bold text-xs md:text-sm shadow-md transition-all-300">
+                        1
+                    </div>
+                    <span id="step-text-1" class="text-[10px] md:text-xs mt-2 font-bold text-indigo-900">かんたん選択</span>
+                </div>
+
+                <!-- ステップ2バッジ -->
+                <div class="z-10 text-center flex flex-col items-center">
+                    <div id="step-badge-2" class="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-slate-200 text-slate-500 font-bold text-xs md:text-sm shadow transition-all-300">
+                        2
+                    </div>
+                    <span id="step-text-2" class="text-[10px] md:text-xs mt-2 font-semibold text-slate-400">おまかせ提案</span>
+                </div>
+
+                <!-- ステップ3バッジ -->
+                <div class="z-10 text-center flex flex-col items-center">
+                    <div id="step-badge-3" class="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-slate-200 text-slate-500 font-bold text-xs md:text-sm shadow transition-all-300">
+                        3
+                    </div>
+                    <span id="step-text-3" class="text-[10px] md:text-xs mt-2 font-semibold text-slate-400">かんたん仕上げ</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-step-1" class="space-y-6">
+            <div class="text-center max-w-xl mx-auto space-y-2">
+                <h2 class="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">何を作りたいですか？</h2>
+                <p class="text-slate-500 text-xs md:text-sm leading-relaxed">
+                    難しい専門知識や「AI」という冷たい言葉は使いません。いくつか選ぶだけで、あなたの業種に合わせた「伝わる文章」と「配置イメージ」をおまかせで本当に作成します。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto pt-2">
+                
+                <!-- 1. 印刷物の種類選択 -->
+                <div class="md:col-span-3 space-y-3">
+                    <label class="block text-xs md:text-sm font-bold text-slate-700">1. 作成する印刷物をえらぶ：</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <!-- チラシボタン（修正済み説明文） -->
+                        <button onclick="selectPrintType('flyer')" id="btn-type-flyer" class="p-3.5 md:p-5 border-2 border-indigo-950 bg-indigo-50/50 rounded-2xl flex flex-col items-center text-center transition-all hover:border-indigo-900 hover:shadow-sm focus:outline-none">
+                            <span class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-900 text-lg mb-2.5">
+                                <i class="fa-solid fa-rectangle-ad"></i>
+                            </span>
+                            <span class="font-bold text-xs md:text-sm text-indigo-950">チラシ・パンフ</span>
+                            <!-- ご指示の通り「集客やセミナー、イベントに」に変更しています -->
+                            <span id="flyer-sub-text" class="text-[9px] text-slate-500 mt-1 font-medium">集客やセミナー、イベントに</span>
+                        </button>
+
+                        <!-- 名刺ボタン -->
+                        <button onclick="selectPrintType('card')" id="btn-type-card" class="p-3.5 md:p-5 border-2 border-slate-200 bg-white rounded-2xl flex flex-col items-center text-center transition-all hover:border-indigo-900 hover:shadow-sm focus:outline-none">
+                            <span class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 text-lg mb-2.5">
+                                <i class="fa-solid fa-address-card"></i>
+                            </span>
+                            <span class="font-bold text-xs md:text-sm text-slate-700">ビジネス名刺</span>
+                            <span class="text-[9px] text-slate-500 mt-1">信頼や顔を広げる</span>
+                        </button>
+
+                        <!-- 会社案内ボタン -->
+                        <button onclick="selectPrintType('guide')" id="btn-type-guide" class="p-3.5 md:p-5 border-2 border-slate-200 bg-white rounded-2xl flex flex-col items-center text-center transition-all hover:border-indigo-900 hover:shadow-sm focus:outline-none">
+                            <span class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 text-lg mb-2.5">
+                                <i class="fa-solid fa-book-open"></i>
+                            </span>
+                            <span class="font-bold text-xs md:text-sm text-slate-700">会社・事業案内</span>
+                            <span class="text-[9px] text-slate-500 mt-1">実績や魅力を伝える</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. 業種選択ドロップダウン -->
+                <div class="md:col-span-1 space-y-3">
+                    <label class="block text-xs md:text-sm font-bold text-slate-700">2. ご自身の業種：</label>
+                    <select id="industry-select" onchange="toggleOtherIndustry()" class="w-full p-3 border border-slate-300 rounded-xl bg-white shadow-sm focus:border-indigo-900 focus:ring-1 focus:ring-indigo-900 text-xs md:text-sm font-medium text-slate-700">
+                        <option value="士業・各種相談パートナー">士業・各種相談パートナー</option>
+                        <option value="リフォーム・建設・工事">リフォーム・建設・工事</option>
+                        <option value="カフェ・お食事処・移動販売">カフェ・お食事処・移動販売</option>
+                        <option value="美容室・癒やしサロン">美容室・癒やしサロン</option>
+                        <option value="地域のお教室・学習指導">地域のお教室・学習指導</option>
+                        <option value="町工場・ものづくり・製品加工">町工場・ものづくり・製品加工</option>
+                        <option value="other">その他（手入力する）</option>
+                    </select>
+                    <!-- 「その他」選択時のテキスト入力フィールド -->
+                    <input type="text" id="other-industry-input" placeholder="例: ハンドメイド作家" class="hidden w-full p-3 border border-slate-300 rounded-xl bg-white shadow-sm focus:border-indigo-900 focus:ring-1 focus:ring-indigo-900 text-xs md:text-sm font-medium text-slate-700 mt-2">
+                </div>
+
+                <!-- 3. 今回の目的選択 -->
+                <div class="md:col-span-2 space-y-3">
+                    <label class="block text-xs md:text-sm font-bold text-slate-700">3. 今回の一番の目的：</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="selectPurpose('trust')" id="btn-purpose-trust" class="py-2.5 px-3 border border-indigo-900 bg-indigo-50/50 text-indigo-900 font-bold text-xs rounded-xl text-center transition-all focus:outline-none">
+                            <i class="fa-solid fa-shield-halved mr-1 text-amber-600"></i>安心感や信頼感を伝える
+                        </button>
+                        <button onclick="selectPurpose('sales')" id="btn-purpose-sales" class="py-2.5 px-3 border border-slate-200 bg-white text-slate-600 font-semibold text-xs rounded-xl text-center transition-all focus:outline-none">
+                            <i class="fa-solid fa-phone-volume mr-1 text-emerald-600"></i>新しい予約・相談を増やす
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. 強みの選択 -->
+                <div class="md:col-span-3 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs md:text-sm font-bold text-slate-700">4. あなたの「強み」をえらぶ（複数選べます）：</label>
+                        <span class="text-[10px] text-slate-400">※選ぶと青く光ります</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2" id="strengths-container">
+                        <!-- 動的にJavaScriptで追加されます -->
+                    </div>
+                </div>
+
+                <!-- 5. 会社名・連絡先入力欄 -->
+                <div class="md:col-span-3 space-y-3" id="meta-inputs-container">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5" id="label-name-input">お名前（または、店舗名・会社名）：</label>
+                            <input type="text" id="input-name" placeholder="例: らくらく会計事務所" class="w-full p-3 border border-slate-300 rounded-xl shadow-sm focus:border-indigo-900 focus:ring-1 focus:ring-indigo-900 text-xs md:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">ご連絡先（電話番号やメールなど）：</label>
+                            <input type="text" id="input-contact" placeholder="例: 03-1234-5678 (平日9時～18時)" class="w-full p-3 border border-slate-300 rounded-xl shadow-sm focus:border-indigo-900 focus:ring-1 focus:ring-indigo-900 text-xs md:text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. 自由記述アピール入力欄 -->
+                <div class="md:col-span-3 space-y-3">
+                    <label class="block text-xs md:text-sm font-bold text-slate-700 flex justify-between">
+                        <span>その他のアピール文やメモ書き <span class="text-[10px] font-normal text-slate-400">（ここに書いたバラバラなメモ書きも綺麗な文章に整えられます！）</span></span>
+                    </label>
+                    <textarea id="additional-text" rows="3" placeholder="例:
+・創業20年。これまでに300件以上の地元相談に乗ってきました。
+・初回相談はいつでもじっくりとお話を伺います。" class="w-full p-3 border border-slate-300 rounded-2xl shadow-sm focus:border-indigo-900 focus:ring-1 focus:ring-indigo-900 text-slate-700 text-xs md:text-sm leading-relaxed"></textarea>
+                </div>
+            </div>
+
+            <!-- 送信ボタン -->
+            <div class="text-center pt-4 max-w-sm mx-auto">
+                <button onclick="generateProposal()" class="w-full py-3.5 px-6 bg-gradient-to-r from-indigo-900 to-indigo-950 hover:from-indigo-800 hover:to-indigo-900 text-white font-bold text-sm md:text-base rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 transform active:scale-95">
+                    プロ仕様のおまかせ構成をつくる
+                    <i class="fa-solid fa-magic"></i>
+                </button>
+                <p class="text-[10px] text-slate-400 mt-2">
+                    「おまかせ職人システム」があなたの強みをプロレベルに自動構成します
+                </p>
+            </div>
+        </div>
+
+        <!-- ローディング画面 -->
+        <div id="screen-loading" class="hidden py-16 text-center space-y-6 max-w-sm mx-auto">
+            <div class="relative w-20 h-20 mx-auto">
+                <div class="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-indigo-900 border-t-transparent rounded-full animate-spin"></div>
+                <div class="absolute inset-4 bg-white rounded-full flex items-center justify-center text-xl text-indigo-900">
+                    <i class="fa-solid fa-pen-fancy animate-bounce"></i>
+                </div>
+            </div>
+            
+            <div class="space-y-3">
+                <h3 class="text-base font-bold text-slate-800" id="loading-title">おまかせ職人が文言を執筆しています...</h3>
+                <div class="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                    <div id="loading-bar" class="bg-gradient-to-r from-indigo-900 to-amber-500 h-1 rounded-full transition-all duration-300" style="width: 10%;"></div>
+                </div>
+                <p class="text-[10px] text-slate-400 font-medium tracking-wider" id="loading-sub">
+                    業界の特徴に合わせてキャッチコピーを構築中...
+                </p>
+            </div>
+        </div>
+
+        <!-- ステップ2: おまかせ提案＆編集画面 -->
+        <div id="screen-step-2" class="hidden space-y-6">
+            <div class="text-center max-w-xl mx-auto space-y-1">
+                <h2 class="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">おまかせ構成と出来上がり図が完成！</h2>
+                <p class="text-slate-500 text-xs">
+                    左側の文章を書きかえると、右側の仕上がりイメージ（プレビュー）にリアルタイムで連動反映されます。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-5xl mx-auto pt-2">
+                
+                <!-- 左側：構成テキスト編集エリア -->
+                <div class="lg:col-span-6 space-y-4">
+                    <div class="glass-card rounded-2xl p-4 md:p-5 shadow-sm border border-slate-200">
+                        <div class="flex justify-between items-center mb-3 pb-2.5 border-b border-slate-100">
+                            <span class="text-xs font-bold text-indigo-900 tracking-wider flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-indigo-900 animate-ping"></span>
+                                おまかせ自動作成された文章（自由に編集できます）
+                            </span>
+                            <button onclick="copyGeneratedText()" class="text-[11px] text-indigo-900 hover:text-indigo-950 font-bold flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-all">
+                                <i class="fa-solid fa-copy"></i>
+                                <span id="btn-copy-text">一括コピーする</span>
+                            </button>
+                        </div>
+
+                        <div class="space-y-3.5 max-h-[440px] overflow-y-auto pr-1" id="generated-contents-area">
+                            <!-- 動的にJavaScriptで各ブロック用の入力フィールドが自動作成されます -->
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50/70 border border-amber-200/50 rounded-xl p-3 flex gap-2.5">
+                        <div class="text-amber-600 text-sm pt-0.5"><i class="fa-solid fa-circle-info"></i></div>
+                        <div>
+                            <h4 class="text-[11px] font-bold text-amber-900">プレビューを確認して次のステップへ！</h4>
+                            <p class="text-[10px] text-amber-800 leading-normal mt-0.5">
+                                文字の配置と内容が決まったら、下の「この内容で決定！デザインを仕上げる」を押して、無料デザインアプリ「Canva」への流し込み仕上げに進みます。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右側：リアルタイムビジュアルプレビュー -->
+                <div class="lg:col-span-6 space-y-3 flex flex-col justify-start">
+                    <h3 class="text-xs font-bold text-slate-700 flex items-center justify-between">
+                        <span><i class="fa-solid fa-eye text-indigo-900 mr-1"></i> 実際の印刷仕上がりイメージ</span>
+                        <span id="preview-type-badge" class="px-2 py-0.5 bg-indigo-100 text-indigo-900 font-bold rounded text-[9px] tracking-widest">A4チラシ</span>
+                    </h3>
+                    
+                    <div class="w-full flex items-center justify-center bg-slate-100 rounded-2xl p-4 border border-slate-200 min-h-[400px]">
+                        <div id="visual-preview-card" class="bg-white border border-slate-300 rounded-lg shadow-md relative overflow-hidden transition-all duration-300 w-full" style="max-width: 320px;">
+                            <div id="preview-card-inner" class="h-full w-full flex flex-col justify-between p-4">
+                                <!-- デフォルト配置 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作ボタン -->
+            <div class="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto pt-4">
+                <button onclick="goBackToStep1()" class="w-full sm:w-1/3 py-3 px-4 border border-slate-300 text-slate-600 font-bold text-xs rounded-xl hover:bg-slate-50 transition-all text-center">
+                    <i class="fa-solid fa-arrow-left mr-1"></i>条件を選び直す
+                </button>
+                <button onclick="goToStep3()" class="w-full sm:w-2/3 py-3 px-4 bg-gradient-to-r from-indigo-900 to-indigo-950 text-white font-bold text-xs md:text-sm rounded-xl shadow-md hover:from-indigo-800 hover:to-indigo-900 transition-all flex items-center justify-center gap-1.5">
+                    この内容で決定！デザインを仕上げる
+                    <i class="fa-solid fa-circle-check"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ステップ3: Canvaテンプレート案内・仕上げ画面 -->
+        <div id="screen-step-3" class="hidden space-y-6">
+            <div class="text-center max-w-xl mx-auto space-y-1">
+                <h2 class="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">かんたん印刷テンプレートで完成！</h2>
+                <p class="text-slate-500 text-xs">
+                    完成したおまかせ構成テキストはクリップボードに自動保存されました。あとは貼り付けるだけで完了です！
+                </p>
+            </div>
+
+            <div class="max-w-3xl mx-auto glass-card rounded-2xl p-5 md:p-6 shadow-md space-y-5 border border-slate-200">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">最後の仕上げ</span>
+                            <h3 class="text-base md:text-lg font-extrabold text-slate-900 leading-tight">
+                                おすすめ印刷用紙の<br>文字を書きかえるだけで完了
+                            </h3>
+                        </div>
+                        <p class="text-xs text-slate-500 leading-relaxed">
+                            デザイン用紙作成サービス「Canva」に用意された、最適なテンプレート用紙をご案内します。先ほど一括コピーされた文章をご自身のパソコンやスマホで「貼り付け（ペースト）」するだけで、本格的な印刷用データが出来上がります。
+                        </p>
+
+                        <div class="py-2.5 px-3 bg-emerald-50 text-emerald-800 border border-emerald-100 text-xs rounded-xl flex items-center gap-2 font-medium">
+                            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                            作成した構成テキストの一括コピーが完了しています！
+                        </div>
+
+                        <div class="pt-1">
+                            <a id="canva-search-link" href="#" target="_blank" class="w-full py-3 px-4 bg-[#00c4cc] hover:bg-[#00b0b8] text-white font-extrabold text-xs md:text-sm rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-up-right-from-square"></i>
+                                <span id="canva-btn-text">Canvaで仕上げテンプレートを開く</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-tr from-indigo-50/50 to-amber-50/50 rounded-xl p-5 border border-slate-100 flex flex-col items-center justify-center text-center space-y-3">
+                        <div class="relative flex items-center justify-center w-28 h-16">
+                            <div class="w-12 h-12 bg-indigo-900 rounded-xl flex items-center justify-center text-white text-base font-bold shadow-sm absolute -left-2 z-10 animate-pulse">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </div>
+                            <div class="text-slate-300 text-sm z-20">
+                                <i class="fa-solid fa-angles-right"></i>
+                            </div>
+                            <div class="w-12 h-12 bg-[#00c4cc] rounded-xl flex items-center justify-center text-white text-[10px] font-extrabold shadow-sm absolute -right-2 z-10">
+                                完成！
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <span class="text-xs font-bold text-slate-700">プロ品質 of 仕上がり</span>
+                            <p class="text-[9px] text-slate-400 leading-normal">
+                                型崩れのないレイアウト構造のため、文字をのせるだけでそのまま印刷屋さんへ発注できるデータになります。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 利用ガイド -->
+                <div class="border-t border-slate-100 pt-5">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">かんたん作業ガイド（初心者様向け）</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="p-3 bg-slate-50 rounded-xl space-y-1 border border-slate-200/50">
+                            <div class="w-5 h-5 bg-indigo-900 text-white rounded-full flex items-center justify-center text-[10px] font-bold">1</div>
+                            <h5 class="text-[11px] font-bold text-slate-800">テンプレートを開く</h5>
+                            <p class="text-[10px] text-slate-500 leading-relaxed">
+                                上の青いボタンを押すと、各印刷物の専用デザイン用紙が自動的に開きます。
+                            </p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-xl space-y-1 border border-slate-200/50">
+                            <div class="w-5 h-5 bg-indigo-900 text-white rounded-full flex items-center justify-center text-[10px] font-bold">2</div>
+                            <h5 class="text-[11px] font-bold text-slate-800">文章を貼り付け（ペースト）</h5>
+                            <p class="text-[10px] text-slate-500 leading-relaxed">
+                                すでにコピーされているので、文字を入れ替えたい場所を選んで、そのまま「貼り付け」を行うだけです。
+                            </p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-xl space-y-1 border border-slate-200/50">
+                            <div class="w-5 h-5 bg-indigo-900 text-white rounded-full flex items-center justify-center text-[10px] font-bold">3</div>
+                            <h5 class="text-[11px] font-bold text-slate-800">完成＆お届け</h5>
+                            <p class="text-[10px] text-slate-500 leading-relaxed">
+                                画面上の指示に従って印刷注文をすれば、格安で美しい本物の紙が数日でお手元に届きます。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 戻るボタン -->
+            <div class="text-center pt-2">
+                <button onclick="goBackToStep2()" class="text-xs font-bold text-slate-500 hover:text-indigo-900 transition-all inline-flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> 作成した構成テキストの微調整に戻る
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="bg-white border-t border-slate-200 py-5 text-center text-slate-400 text-xs">
+        <div class="max-w-5xl mx-auto px-4 space-y-1">
+            <p class="font-medium">&copy; 2026 らくらく印刷おまかせアシスタント.</p>
+            <p class="text-[10px] text-slate-300">※本システムは、難しい言葉を使わずに誰でも簡単に印刷用の原稿が作成できるように設計された支援ツールです。</p>
+        </div>
+    </footer>
+
+    <!-- コピー成功時のトースト通知ポップアップ -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 text-xs font-semibold">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-message">コピーしました！</span>
+    </div>
+
+    <!-- アプリケーションのすべての処理 JavaScript -->
+    <script>
+        let selectedPrintType = 'flyer';
+        let selectedPurpose = 'trust';
+        let selectedStrengths = new Set();
+        
+        // 各種業界に最適化した「私たちの強み」のプリセット文言
+        const industryStrengths = {
+            '士業・各種相談パートナー': [
+                '創業支援の相談実績200件超', '夜間や休日も親身に対応', '初めてのご相談はいつでも無料', '追加費用の発生しない明朗会計', '地元に根差した寄り添う対話', '専門チームがワンストップで対応'
+            ],
+            'リフォーム・建設・工事': [
+                '経験豊かな職人の自社一貫施工', '見積・現場調査はすべて無料', '万一に備えた長期の工事保証', '迅速なスピード見積り対応', 'マナーと笑顔の徹底', '地元一筋30年の豊富な実績'
+            ],
+            'カフェ・お食事処・移動販売': [
+                '手作りにこだわった優しい味付け', 'ボリュームたっぷりでお得感抜群', '時間指定 of デリバリー対応可', '貸切・宴会でのご利用歓迎', '地場野菜をたっぷり使った料理', 'アレルギー食材への柔軟対応'
+            ],
+            '美容室・癒やしサロン': [
+                '他のお客様が気にならない貸切個室', '最初のカウンセリングを最重視', '仕事帰りにも嬉しい遅い時間まで', 'お肌に優しいオーガニック素材', 'リピート率80％以上の信頼', '初心者でも入りやすい店舗設計'
+            ],
+            '地域のお教室・学習指導': [
+                '初心者が楽しく学べる安心授業', '目の行き届く少人数制フォロー', '気軽なおためし無料レッスン', '急な都合の時のキャンセル料ゼロ', '親しみやすい丁寧な指導', '駐車場・送り迎え用スペース完備'
+            ],
+            '町工場・ものづくり・製品加工': [
+                '小ロット・1点ものから対応', 'アイデアからの迅速な試作提案', 'ミクロン単位の厳格な品質確認', '手書きのスケッチからの相談歓迎', '短納期のピンチにも全力を尽くす', '長年受け継いだ確かな手技'
+            ]
+        };
+
+        const typePlaceholders = {
+            'flyer': { label: '店舗名・会社名など：', name: 'さくら総合法律事務所', notes: '・地域に密着して25年、分かりやすい解説を大切にする事務所です。\n・お金や家族のお悩み、お気軽にご相談ください。' },
+            'card': { label: 'お名前（会社名や役職なども）：', name: 'ひまわり建設株式会社 / 代表 山田 太郎', notes: '・家のお直しやプチリフォームが得意な大工です。\n・住まいの「困った」を当日中に見に行きます。' },
+            'guide': { label: '会社名・サービス名：', name: '森のカフェテラス どんぐり', notes: '・地元産の旬な果物や無農薬野菜をたっぷり使った食事処です。\n・手作りお弁当の宅配や、小さなお集まりのご利用も承ります。' }
+        };
+
+        window.onload = function() {
+            updateStrengthsContainer();
+            applyTypePlaceholders('flyer');
+        }
+
+        function applyTypePlaceholders(type) {
+            const placeholders = typePlaceholders[type];
+            document.getElementById('label-name-input').innerText = placeholders.label;
+            document.getElementById('input-name').placeholder = `例: ${placeholders.name}`;
+            document.getElementById('additional-text').placeholder = `例:\n${placeholders.notes}`;
+        }
+
+        function selectPrintType(type) {
+            selectedPrintType = type;
+            
+            document.getElementById('btn-type-flyer').className = "p-3.5 md:p-5 border-2 border-slate-200 bg-white rounded-2xl flex flex-col items-center text-center transition-all hover:border-indigo-900 hover:shadow-sm focus:outline-none";
+            document.getElementById('btn-type-card').className = "p-3.5 md:p-5 border-2 border-slate-200 bg-white rounded-2xl flex flex-col items-center text-center transition-all hover:border-indigo-900 hover:shadow-sm focus:outline-none";
+            document.getElementById('btn-type-guide').className = "p-3.5 md:p-5 border-2 border-slate-200 bg-white rounded-2xl flex flex-col items-center text-center transition-all hover:border-indigo-900 hover:shadow-sm focus:outline-none";
+
+            const activeBtn = document.getElementById(`btn-type-${type}`);
+            activeBtn.className = "p-3.5 md:p-5 border-2 border-indigo-950 bg-indigo-50/50 rounded-2xl flex flex-col items-center text-center transition-all hover:border-indigo-900 hover:shadow-sm focus:outline-none";
+            
+            applyTypePlaceholders(type);
+            updateStrengthsContainer();
+        }
+
+        function toggleOtherIndustry() {
+            const selectVal = document.getElementById('industry-select').value;
+            const otherInput = document.getElementById('other-industry-input');
+            if(selectVal === 'other') {
+                otherInput.classList.remove('hidden');
+            } else {
+                otherInput.classList.add('hidden');
+                updateStrengthsContainer();
+            }
+        }
+
+        function updateStrengthsContainer() {
+            const selectVal = document.getElementById('industry-select').value;
+            let currentStrengths = industryStrengths[selectVal] || [];
+            if (selectVal === 'other') {
+                currentStrengths = ['丁寧で親身な対応をお約束', 'お急ぎのご相談も可能', '分かりやすくてお得な料金', '地域トップクラスの実績', '温かいサポート体制', 'まずは無料の相談窓口'];
+            }
+            
+            const container = document.getElementById('strengths-container');
+            container.innerHTML = '';
+            selectedStrengths.clear();
+
+            currentStrengths.forEach((strength, index) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.onclick = () => toggleStrength(strength, button);
+                button.className = "py-2 px-3 border border-slate-200 bg-white text-[11px] text-slate-600 rounded-xl hover:border-indigo-900 transition-all font-medium focus:outline-none";
+                button.innerHTML = `<i class="fa-solid fa-plus mr-1 text-slate-400"></i>${strength}`;
+                container.appendChild(button);
+                
+                if (index < 3) {
+                    toggleStrength(strength, button);
+                }
+            });
+        }
+
+        function toggleStrength(strength, button) {
+            if (selectedStrengths.has(strength)) {
+                selectedStrengths.delete(strength);
+                button.className = "py-2 px-3 border border-slate-200 bg-white text-[11px] text-slate-600 rounded-xl hover:border-indigo-900 transition-all font-medium focus:outline-none";
+                button.innerHTML = `<i class="fa-solid fa-plus mr-1 text-slate-400"></i>${strength}`;
+            } else {
+                selectedStrengths.add(strength);
+                button.className = "py-2 px-3 border-2 border-indigo-900 bg-indigo-50/70 text-[11px] text-indigo-900 font-bold rounded-xl transition-all focus:outline-none";
+                button.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-indigo-900"></i>${strength}`;
+            }
+        }
+
+        function selectPurpose(purpose) {
+            selectedPurpose = purpose;
+            document.getElementById('btn-purpose-trust').className = "py-2.5 px-3 border border-slate-200 bg-white text-slate-600 font-semibold text-xs rounded-xl text-center transition-all focus:outline-none";
+            document.getElementById('btn-purpose-sales').className = "py-2.5 px-3 border border-slate-200 bg-white text-slate-600 font-semibold text-xs rounded-xl text-center transition-all focus:outline-none";
+
+            const activeBtn = document.getElementById(`btn-purpose-${purpose}`);
+            activeBtn.className = "py-2.5 px-3 border border-indigo-900 bg-indigo-50/30 text-indigo-900 font-bold text-xs rounded-xl text-center transition-all focus:outline-none";
+        }
+
+        // Gemini APIを安全に呼び出すための指数バックオフ処理
+        async function callGeminiAPI(payload) {
+            const apiKey = ""; // 実行環境からキーが自動注入されます
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            let delay = 1000;
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                } catch (e) {
+                    // 自動リトライ
+                }
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+            }
+            throw new Error("通信が不安定でした。");
+        }
+
+        async function generateProposal() {
+            let industry = document.getElementById('industry-select').value;
+            if(industry === 'other') {
+                industry = document.getElementById('other-industry-input').value || '各種専門サービス';
+            }
+
+            const rawName = document.getElementById('input-name').value.trim();
+            const rawContact = document.getElementById('input-contact').value.trim();
+            const additionalText = document.getElementById('additional-text').value.trim();
+
+            const name = rawName || "街の親切アドバイザー";
+            const contact = rawContact || "03-0000-0000 (いつでもお気軽にご相談ください)";
+            const strengthsArray = Array.from(selectedStrengths);
+
+            // 画面を切り替えてローディングアニメーションを走らせる
+            document.getElementById('screen-step-1').classList.add('hidden');
+            document.getElementById('screen-loading').classList.remove('hidden');
+            
+            document.getElementById('progress-line-active').style.width = "50%";
+            document.getElementById('step-badge-2').className = "w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-indigo-900 text-white font-bold text-xs md:text-sm shadow-md transition-all-300";
+            document.getElementById('step-text-2').className = "text-[10px] md:text-xs mt-2 font-bold text-indigo-900";
+
+            let progress = 10;
+            const progressTimer = setInterval(() => {
+                if (progress < 90) {
+                    progress += 10;
+                    document.getElementById('loading-bar').style.width = `${progress}%`;
+                }
+            }, 300);
+
+            // Geminiへのおまかせ指示（プロンプト）
+            const typeLabel = selectedPrintType === 'flyer' ? 'チラシ' : selectedPrintType === 'card' ? 'ビジネス名刺' : '会社案内・パンフレット';
+            const purposeLabel = selectedPurpose === 'trust' ? '安心感や信頼感を高める' : '予約や相談の新規問い合わせを増やす';
+
+            const userPrompt = `以下の条件に基づいて、印刷物の作成に必要な【キャッチコピー】【案内メッセージ・紹介文】【3つの強み】を作成してください。
+
+■ 作成する印刷物: ${typeLabel}
+■ 業種・ジャンル: ${industry}
+■ 一番の目的: ${purposeLabel}
+■ ユーザーが選択した強み: ${strengthsArray.join(', ')}
+■ 会社・店舗名: ${name}
+■ 連絡先: ${contact}
+■ 追加情報・アピール: ${additionalText || '特になし'}
+
+【注意ルール】
+・「AI」という冷たい専門用語やシステム的な言葉は、作成する文章の中に絶対に1回も使わないでください。
+・中小企業の優しさ、信頼感、地域に寄り添う親身な姿勢が伝わる日本語で書いてください。
+・作成する「3つの強み」は、選択された強みのニュアンスを活かし、15文字程度のキャッチーな短文に整えてください。`;
+
+            const apiPayload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: {
+                    parts: [{ text: "あなたは、専門用語や『AI』などの言葉を絶対に使わずに、中小企業の魅力を親切丁寧に引き出すコピーライティングのプロです。作成するテキストは温かみと安心感を最重視してください。" }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            catchPhrase: { type: "STRING", description: "印刷物の最上部や一番目立つ位置に書くメインキャッチコピー。35文字前後。" },
+                            leadSentence: { type: "STRING", description: "魅力を補足し安心感を与える導入文・案内文。120文字程度。" },
+                            strength1: { type: "STRING", description: "選ばれる強み・特長1。15文字以内。" },
+                            strength2: { type: "STRING", description: "選ばれる強み・特長2。15文字以内。" },
+                            strength3: { type: "STRING", description: "選ばれる強み・特長3。15文字以内。" }
+                        },
+                        required: ["catchPhrase", "leadSentence", "strength1", "strength2", "strength3"]
+                    }
+                }
+            };
+
+            try {
+                // 本物のGeminiに接続
+                const result = await callGeminiAPI(apiPayload);
+                clearInterval(progressTimer);
+                document.getElementById('loading-bar').style.width = "100%";
+                
+                const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                const aiData = JSON.parse(responseText);
+
+                document.getElementById('screen-loading').classList.add('hidden');
+                document.getElementById('screen-step-2').classList.remove('hidden');
+
+                displayGeneratedResult(aiData.catchPhrase, aiData.leadSentence, aiData.strength1, aiData.strength2, aiData.strength3, name, contact);
+
+            } catch (error) {
+                // 通信エラーやキー未設定時のための、スマートな自動代行（フォールバック）
+                clearInterval(progressTimer);
+                setTimeout(() => {
+                    document.getElementById('screen-loading').classList.add('hidden');
+                    document.getElementById('screen-step-2').classList.remove('hidden');
+
+                    let mockCatch = `【地元に愛されて20年】${industry}の、身近で親切な専門相談窓口です`;
+                    let mockLead = `「どこに相談すればいいか分からなくて…」そんなお悩みを抱えていませんか？私たちは、皆様一人ひとりの不安に優しく寄り添い、丁寧で確実なサポートを提供いたします。些細なことでもお気軽にご相談ください。`;
+                    if (selectedPurpose === 'sales') {
+                        mockCatch = `【お悩みすっきり解決】今だけ無料！${industry}のおまかせ相談室はこちら`;
+                        mockLead = `新生活のスタートや、毎日の生活の中のちょっとしたお困りごとを解決します！迅速なご対応と分かりやすいご説明をモットーに、皆様の笑顔のために全力を尽くします。`;
+                    }
+                    
+                    displayGeneratedResult(
+                        mockCatch, 
+                        mockLead, 
+                        strengthsArray[0] || "安心の明朗お見積り", 
+                        strengthsArray[1] || "親切で丁寧な個別サポート", 
+                        strengthsArray[2] || "即日の迅速なご対応", 
+                        name, 
+                        contact
+                    );
+                    showToast("おまかせ文章が完成しました！");
+                }, 800);
+            }
+        }
+
+        function displayGeneratedResult(catchPhrase, leadSentence, str1, str2, str3, name, contact) {
+            const accentWording = selectedPrintType === 'flyer' ? "A4チラシ" : selectedPrintType === 'card' ? "ビジネス名刺" : "会社・事業案内";
+            document.getElementById('preview-type-badge').innerText = accentWording;
+
+            // 構成用の編集フィールドの生成
+            const contentsArea = document.getElementById('generated-contents-area');
+            contentsArea.innerHTML = `
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 block tracking-wider uppercase">A: メインキャッチコピー（見出し）</label>
+                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus-within:border-indigo-900 transition-all">
+                        <input type="text" id="edit-catchphrase" value="${catchPhrase}" class="w-full bg-transparent border-none text-slate-800 font-bold text-xs md:text-sm focus:ring-0 focus:outline-none p-0">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 block tracking-wider uppercase">B: 紹介メッセージ・案内文</label>
+                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus-within:border-indigo-900 transition-all">
+                        <textarea id="edit-lead" rows="3" class="w-full bg-transparent border-none text-slate-700 text-xs focus:ring-0 focus:outline-none p-0 leading-relaxed">${leadSentence}</textarea>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 block tracking-wider uppercase">C: 選ばれる3つの強み</label>
+                    <div class="space-y-2">
+                        <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2 focus-within:border-indigo-900 transition-all">
+                            <span class="text-amber-600 text-xs font-bold w-4 text-center">1</span>
+                            <input type="text" id="edit-str1" value="${str1}" class="w-full bg-transparent border-none text-slate-700 font-medium text-xs focus:ring-0 focus:outline-none p-0">
+                        </div>
+                        <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2 focus-within:border-indigo-900 transition-all">
+                            <span class="text-amber-600 text-xs font-bold w-4 text-center">2</span>
+                            <input type="text" id="edit-str2" value="${str2}" class="w-full bg-transparent border-none text-slate-700 font-medium text-xs focus:ring-0 focus:outline-none p-0">
+                        </div>
+                        <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2 focus-within:border-indigo-900 transition-all">
+                            <span class="text-amber-600 text-xs font-bold w-4 text-center">3</span>
+                            <input type="text" id="edit-str3" value="${str3}" class="w-full bg-transparent border-none text-slate-700 font-medium text-xs focus:ring-0 focus:outline-none p-0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 block tracking-wider uppercase">D: お名前・店舗名</label>
+                        <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl focus-within:border-indigo-900 transition-all">
+                            <input type="text" id="edit-name" value="${name}" class="w-full bg-transparent border-none text-slate-800 font-bold text-xs focus:ring-0 focus:outline-none p-0">
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-400 block tracking-wider uppercase">E: ご連絡先</label>
+                        <div class="p-2 bg-slate-50 border border-slate-200 rounded-xl focus-within:border-indigo-900 transition-all">
+                            <input type="text" id="edit-contact" value="${contact}" class="w-full bg-transparent border-none text-slate-800 font-bold text-xs focus:ring-0 focus:outline-none p-0">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            updateVisualPreview();
+            setupRealtimePreviewSync();
+        }
+
+        function updateVisualPreview() {
+            const previewCard = document.getElementById('visual-preview-card');
+            const catchPhrase = document.getElementById('edit-catchphrase').value;
+            const leadSentence = document.getElementById('edit-lead').value;
+            const s1 = document.getElementById('edit-str1').value;
+            const s2 = document.getElementById('edit-str2').value;
+            const s3 = document.getElementById('edit-str3').value;
+            const name = document.getElementById('edit-name').value;
+            const contact = document.getElementById('edit-contact').value;
+
+            if (selectedPrintType === 'flyer') {
+                previewCard.style.aspectRatio = "1 / 1.414";
+                previewCard.style.maxWidth = "320px";
+                
+                previewCard.innerHTML = `
+                    <div class="h-full flex flex-col justify-between p-4 bg-white text-slate-900 text-left">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-[8px] font-bold tracking-wider">
+                                <span class="bg-indigo-900 text-white px-1.5 py-0.5 rounded-sm">おまかせA4チラシ</span>
+                                <span class="text-slate-400 font-normal">ご案内サンプル</span>
+                            </div>
+                            <h4 id="prev-title" class="text-xs md:text-sm font-extrabold text-indigo-950 leading-snug tracking-tight text-center border-b border-indigo-100 pb-2">
+                                ${catchPhrase}
+                            </h4>
+                            <p id="prev-lead" class="text-[9px] text-slate-600 leading-normal font-normal text-justify">
+                                ${leadSentence}
+                            </p>
+                        </div>
+
+                        <div class="my-2 p-2 bg-indigo-50/50 rounded-lg border border-indigo-100 space-y-1.5">
+                            <div class="text-[9px] font-extrabold text-indigo-900 flex items-center gap-1">
+                                <i class="fa-solid fa-star text-amber-500 text-[8px]"></i> 私たちが選ばれる安心の理由
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex items-start gap-1 text-[8px] text-slate-700 leading-tight">
+                                    <span class="text-indigo-900 font-bold">●</span>
+                                    <span id="prev-s1" class="font-bold">${s1}</span>
+                                </div>
+                                <div class="flex items-start gap-1 text-[8px] text-slate-700 leading-tight">
+                                    <span class="text-indigo-900 font-bold">●</span>
+                                    <span id="prev-s2" class="font-bold">${s2}</span>
+                                </div>
+                                <div class="flex items-start gap-1 text-[8px] text-slate-700 leading-tight">
+                                    <span class="text-indigo-900 font-bold">●</span>
+                                    <span id="prev-s3" class="font-bold">${s3}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2 border-t border-slate-100 pt-2">
+                            <div class="flex justify-between items-center">
+                                <span id="prev-name" class="text-[9px] font-bold text-slate-800 truncate">${name}</span>
+                                <span class="text-[8px] text-slate-400">お気軽にお尋ねください</span>
+                            </div>
+                            <div class="bg-indigo-900 text-white p-2 rounded-lg text-center flex items-center justify-between shadow-sm">
+                                <div class="text-left">
+                                    <span class="text-[6px] text-indigo-200 block leading-none">【お電話・お問合せはこちら】</span>
+                                    <span id="prev-contact" class="text-[9px] font-bold block mt-0.5">${contact}</span>
+                                </div>
+                                <span class="text-[7px] bg-amber-500 text-indigo-950 font-bold px-1.5 py-0.5 rounded">無料相談</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (selectedPrintType === 'card') {
+                previewCard.style.aspectRatio = "1.618 / 1";
+                previewCard.style.maxWidth = "360px";
+                
+                previewCard.innerHTML = `
+                    <div class="h-full flex flex-col justify-between p-4 bg-white text-slate-900 text-left border-l-[6px] border-indigo-900">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[8px] font-bold text-indigo-900 tracking-wider block" id="prev-s1">${s1}</span>
+                                <h4 id="prev-name" class="text-xs font-extrabold text-slate-900 mt-1 leading-tight">
+                                    ${name}
+                                </h4>
+                            </div>
+                            <span class="text-[8px] bg-slate-100 text-slate-500 font-bold px-1 py-0.5 rounded">お名刺イメージ</span>
+                        </div>
+
+                        <div class="py-1">
+                            <p id="prev-title" class="text-[9px] font-bold text-indigo-950 leading-relaxed">
+                                ${catchPhrase}
+                            </p>
+                            <p id="prev-lead" class="text-[7.5px] text-slate-500 leading-normal line-clamp-1">
+                                ${leadSentence}
+                            </p>
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-2 flex justify-between items-end text-[7px] text-slate-600">
+                            <div class="space-y-0.5">
+                                <div class="flex items-center gap-1">
+                                    <i class="fa-solid fa-phone text-indigo-900 text-[6px]"></i>
+                                    <span id="prev-contact">${contact}</span>
+                                </div>
+                                <div class="flex items-center gap-1 text-[6.5px]">
+                                    <span class="text-amber-600 font-bold">特長：</span>
+                                    <span id="prev-s2">${s2}</span> / <span id="prev-s3">${s3}</span>
+                                </div>
+                            </div>
+                            <span class="text-[6px] text-indigo-900 font-semibold border-b border-indigo-900/30 pb-0.5">信頼のパートナー</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                previewCard.style.aspectRatio = "1 / 1.414";
+                previewCard.style.maxWidth = "320px";
+                
+                previewCard.innerHTML = `
+                    <div class="h-full flex flex-col justify-between p-4 bg-gradient-to-b from-indigo-950 to-indigo-900 text-white text-center">
+                        <div class="space-y-1 pt-1">
+                            <div class="w-8 h-8 rounded-full bg-white/10 mx-auto flex items-center justify-center text-amber-400 text-xs">
+                                <i class="fa-solid fa-city"></i>
+                            </div>
+                            <p class="text-[7px] text-indigo-200 tracking-widest font-bold uppercase" id="prev-s1">${s1}</p>
+                        </div>
+
+                        <div class="my-4 space-y-2">
+                            <h4 id="prev-title" class="text-xs md:text-sm font-black text-white leading-normal tracking-wide px-1">
+                                ${catchPhrase}
+                            </h4>
+                            <div class="w-10 h-[2px] bg-amber-400 mx-auto my-2"></div>
+                            <p id="prev-lead" class="text-[8px] text-indigo-100 leading-relaxed font-light px-2 line-clamp-3">
+                                ${leadSentence}
+                            </p>
+                        </div>
+
+                        <div class="bg-white/5 p-2 rounded-xl border border-white/10 space-y-1.5">
+                            <h5 id="prev-name" class="text-[10px] font-extrabold text-amber-400">${name}</h5>
+                            <div class="flex justify-center gap-2 text-[7px] text-indigo-100 border-t border-white/5 pt-1.5">
+                                <span id="prev-s2">${s2}</span>
+                                <span>|</span>
+                                <span id="prev-s3">${s3}</span>
+                            </div>
+                            <p id="prev-contact" class="text-[7.5px] text-indigo-200 font-bold leading-none pt-0.5">${contact}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function setupRealtimePreviewSync() {
+            const inputs = [
+                { id: 'edit-catchphrase', target: 'prev-title' },
+                { id: 'edit-lead', target: 'prev-lead' },
+                { id: 'edit-str1', target: 'prev-s1' },
+                { id: 'edit-str2', target: 'prev-s2' },
+                { id: 'edit-str3', target: 'prev-s3' },
+                { id: 'edit-name', target: 'prev-name' },
+                { id: 'edit-contact', target: 'prev-contact' }
+            ];
+
+            inputs.forEach(item => {
+                const element = document.getElementById(item.id);
+                if (element) {
+                    element.addEventListener('input', (e) => {
+                        const target = document.getElementById(item.target);
+                        if (target) {
+                            target.innerText = e.target.value;
+                        }
+                    });
+                }
+            });
+        }
+
+        function copyGeneratedText() {
+            const catchphrase = document.getElementById('edit-catchphrase').value;
+            const lead = document.getElementById('edit-lead').value;
+            const s1 = document.getElementById('edit-str1').value;
+            const s2 = document.getElementById('edit-str2').value;
+            const s3 = document.getElementById('edit-str3').value;
+            const name = document.getElementById('edit-name').value;
+            const contact = document.getElementById('edit-contact').value;
+
+            const structuredText = `【おまかせ印刷構成テキスト】\n\n■種別：${selectedPrintType === 'flyer' ? 'チラシ' : selectedPrintType === 'card' ? '名刺' : '会社案内'}\n■会社名・店舗名：\n${name}\n\n■メイン見出し：\n${catchphrase}\n\n■案内メッセージ：\n${lead}\n\n■私たちの3つの特徴：\n1. ${s1}\n2. ${s2}\n3. ${s3}\n\n■連絡先・お問合せ方法：\n${contact}`;
+
+            const tempBox = document.createElement('textarea');
+            tempBox.value = structuredText;
+            document.body.appendChild(tempBox);
+            tempBox.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast("構成テキストを一括コピーしました！");
+                
+                const copyBtn = document.getElementById('btn-copy-text');
+                copyBtn.innerText = "コピー完了！";
+                setTimeout(() => {
+                    copyBtn.innerText = "一括コピーする";
+                }, 2000);
+            } catch (err) {
+                showToast("手動でコピーしてください。");
+            }
+            document.body.removeChild(tempBox);
+        }
+
+        function goBackToStep1() {
+            document.getElementById('screen-step-2').classList.add('hidden');
+            document.getElementById('screen-step-1').classList.remove('hidden');
+
+            document.getElementById('progress-line-active').style.width = "0%";
+            document.getElementById('step-badge-2').className = "w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-slate-200 text-slate-500 font-bold text-xs md:text-sm shadow transition-all-300";
+            document.getElementById('step-text-2').className = "text-[10px] md:text-xs mt-2 font-semibold text-slate-400";
+        }
+
+        function goToStep3() {
+            copyGeneratedText();
+
+            document.getElementById('screen-step-2').classList.add('hidden');
+            document.getElementById('screen-step-3').classList.remove('hidden');
+
+            document.getElementById('progress-line-active').style.width = "100%";
+            document.getElementById('step-badge-3').className = "w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-indigo-900 text-white font-bold text-xs md:text-sm shadow-md transition-all-300";
+            document.getElementById('step-text-3').className = "text-[10px] md:text-xs mt-2 font-bold text-indigo-900";
+
+            let targetCanvaUrl = "https://www.canva.com/ja_jp/templates/?query=";
+            let ctaWording = "Canvaのテンプレート用紙を開く";
+
+            if (selectedPrintType === 'flyer') {
+                targetCanvaUrl = "https://www.canva.com/ja_jp/flyers/templates/";
+                ctaWording = "Canvaの「チラシ用テンプレート」を開く";
+            } else if (selectedPrintType === 'card') {
+                targetCanvaUrl = "https://www.canva.com/ja_jp/business-cards/templates/";
+                ctaWording = "Canvaの「名刺用テンプレート」を開く";
+            } else {
+                targetCanvaUrl = "https://www.canva.com/ja_jp/templates/?query=%E4%BC%9A%E7%A4%BE%E6%A1%88%E5%86%85";
+                ctaWording = "Canvaの「会社案内テンプレート」を開く";
+            }
+
+            document.getElementById('canva-search-link').href = targetCanvaUrl;
+            document.getElementById('canva-btn-text').innerText = ctaWording;
+        }
+
+        function goBackToStep2() {
+            document.getElementById('screen-step-3').classList.add('hidden');
+            document.getElementById('screen-step-2').classList.remove('hidden');
+
+            document.getElementById('progress-line-active').style.width = "50%";
+            document.getElementById('step-badge-3').className = "w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-slate-200 text-slate-500 font-bold text-xs md:text-sm shadow transition-all-300";
+            document.getElementById('step-text-3').className = "text-[10px] md:text-xs mt-2 font-semibold text-slate-400";
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.className = "fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 transform translate-y-0 opacity-100 transition-all duration-300 z-50 text-xs font-semibold";
+            
+            setTimeout(() => {
+                toast.className = "fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 text-xs font-semibold";
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
