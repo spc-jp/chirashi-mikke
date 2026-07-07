@@ -1110,20 +1110,23 @@ main {
     <div class="howto-section">
       <div class="howto-section-title">アプリの目的</div>
       <div class="howto-purpose">
-        チラシみっけは、紙のチラシ・DM・メニュー表をスマホで撮る（アップロードする）だけで、AIがSNS投稿文とWebページ用コンテンツを自動生成するツールです。SNS運用・Web集客・営業提案の現場でそのまま使えます。
+        チラシみっけは、紙のチラシ・DM・メニュー表をスマホで撮る（またはアップロードする）だけで、AIがSNS投稿文とWebページ用コンテンツを自動生成するツールです。SNS運用・Web集客・営業提案の現場でそのまま使えます。
       </div>
     </div>
 
     <div class="howto-section">
-      <div class="howto-section-title">📄 使い方（4ステップ）</div>
+      <div class="howto-section-title">📄 使い方（かんたん4STEP）</div>
       <ul class="howto-list">
-        <li><div class="howto-num">1</div>チラシ・DM・メニューなどの画像をアップロードする</li>
+        <li><div class="howto-num">1</div>チラシ・DM・メニュー表を撮る（スマホ写真をアップロード）</li>
         <li><div class="howto-num">2</div>業種を選ぶ（任意）</li>
-        <li><div class="howto-num">3</div>「AIでコンテンツを生成」ボタンを押す</li>
-        <li><div class="howto-num">4</div>X・Instagram・LINE・Facebook用の投稿文が自動生成される</li>
-        <li><div class="howto-num">5</div>「Webコンテンツ」タブでSEOタイトル・本文・HTMLも確認できる</li>
-        <li><div class="howto-num">6</div>コピーボタンでそのままSNSに貼り付けて使う</li>
+        <li><div class="howto-num">3</div>「AIでコンテンツを生成」を押す</li>
+        <li><div class="howto-num">4</div>SNS投稿文とWebコンテンツが完成。コピーしてそのまま使う</li>
       </ul>
+    </div>
+
+    <div class="howto-section">
+      <div class="howto-section-title">💡 ヒント</div>
+      <div class="howto-purpose">はじめての方は、右上の設定（⚙️）から「デモデータを入れる」を押すと、完成イメージをすぐに確認できます。</div>
     </div>
 
   </div>
@@ -1134,6 +1137,22 @@ main {
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
     <div class="modal-title">⚙️ 設定</div>
+
+    <div class="setting-item">
+      <div class="setting-info">
+        <div class="setting-label">🎪 デモデータを入れる</div>
+        <div class="setting-desc">サンプルの生成結果をすぐに表示します。商談・営業でそのままお見せいただけます。</div>
+      </div>
+      <button class="setting-btn setting-btn-primary" onclick="fillDemoData()">表示する</button>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-info">
+        <div class="setting-label">🗑️ デモデータをクリア</div>
+        <div class="setting-desc">最初のアップロード画面に戻します。次のお客様にすぐお見せいただけます。</div>
+      </div>
+      <button class="setting-btn setting-btn-danger" onclick="clearDemoData()">クリア</button>
+    </div>
 
     <div class="setting-item">
       <div class="setting-info">
@@ -1786,6 +1805,47 @@ function resetAll() {
   document.getElementById('generateBtn').disabled = true;
   updateFreeCounter();
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+// ========== デモデータ（営業・商談用のサンプル結果） ==========
+const SAMPLE_RESULT = {
+  info: {
+    title: 'カフェ・ド・スマイル 夏の新メニューフェア',
+    summary: '自家製シロップのかき氷と冷製パスタが登場する、夏季限定メニューの案内チラシです。'
+  },
+  sns: {
+    twitter: '夏の新メニュー、はじめました🍧\n自家製シロップのふわふわかき氷と、冷たい特製パスタが登場！\n暑い日はぜひ涼みにいらしてください✨\n#夏メニュー #かき氷 #冷製パスタ',
+    instagram: '☀️夏の新メニュー、スタートしました☀️\n\n今年もこの季節がやってきました🍧\n自家製シロップのふわふわかき氷（全5種）と、\nさっぱり美味しい冷製パスタをご用意しました🍝\n\n暑い日のランチやおやつに、ぜひご利用ください😊\nテイクアウトもできます🥤\n\n#夏メニュー #かき氷 #冷製パスタ #カフェ巡り #ランチ #テイクアウト #夏限定 #スイーツ好きな人と繋がりたい',
+    line: 'こんにちは☀️カフェ・ド・スマイルです。\n\n今週から【夏の新メニュー】がスタートしました🍧\n\n▼自家製シロップのふわふわかき氷（全5種）\n▼さっぱり冷たい特製冷製パスタ\n\n暑い日のひとやすみに、ぜひお立ち寄りください😊\nテイクアウトも承っております🥤\n\nご来店、心よりお待ちしております🌻',
+    facebook: '【夏の新メニューのご案内】\n\n平素よりカフェ・ド・スマイルをご愛顧いただき、誠にありがとうございます。\n\nこのたび、夏季限定の新メニューをご用意いたしました。自家製シロップを使用したふわふわのかき氷（全5種）と、暑い季節にぴったりの特製冷製パスタでございます。\n\nランチタイムやおやつのひとときに、ぜひご利用くださいませ。テイクアウトも承っております。皆さまのご来店を心よりお待ちしております😊'
+  },
+  web: {
+    page_title: '夏の新メニューフェア｜カフェ・ド・スマイル',
+    meta_description: '自家製シロップのかき氷（全5種）と特製冷製パスタが登場。夏季限定の新メニューをカフェ・ド・スマイルでお楽しみください。テイクアウトも対応。',
+    heading: '夏の涼を、ひとやすみに。',
+    body: '【夏の新メニュー、はじめました】\n\n暑い季節にうれしい、ひんやり冷たい新メニューが登場しました。\n\n自家製シロップのふわふわかき氷は、いちご・抹茶・レモン・ブルーベリー・ミルクの全5種。素材にこだわった手作りシロップで、やさしい甘さに仕上げました。\n\nさっぱりといただける特製冷製パスタは、ランチにもおすすめです。\n\n店内でのお食事はもちろん、テイクアウトも承っております。暑い日のひとやすみに、ぜひお立ち寄りください。',
+    html_snippet: '<section style="font-family:sans-serif;max-width:600px;margin:0 auto;background:linear-gradient(135deg,#e0f7fa,#ffffff);border-radius:16px;padding:40px 32px;text-align:center;">\n  <p style="color:#00acc1;font-weight:700;letter-spacing:0.1em;margin:0 0 12px;">SUMMER MENU 2025</p>\n  <h2 style="font-size:28px;color:#006064;margin:0 0 16px;">夏の涼を、ひとやすみに。</h2>\n  <p style="color:#333333;line-height:1.9;margin:0 0 24px;">自家製シロップのふわふわかき氷（全5種）と、さっぱり冷製パスタが登場。暑い日のランチやおやつに、ぜひご利用ください。</p>\n  <a href="#" style="display:inline-block;background:#00acc1;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:30px;font-weight:700;">メニューを見る</a>\n</section>'
+  }
+};
+
+function fillDemoData() {
+  closeModal('settingsModal');
+  // 業種「飲食・カフェ」を選択状態にする（見栄え用）
+  selectedGenre = '飲食・カフェ';
+  document.querySelectorAll('.genre-btn').forEach(b => {
+    b.classList.remove('active');
+    if (b.textContent.includes('飲食')) b.classList.add('active');
+  });
+  // 画面を結果表示に切り替え
+  document.getElementById('uploadCard').style.display = 'none';
+  document.getElementById('loadingCard').style.display = 'none';
+  lastResult = SAMPLE_RESULT;
+  renderResult(SAMPLE_RESULT);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function clearDemoData() {
+  closeModal('settingsModal');
+  resetAll();
 }
 </script>
 </body>
