@@ -134,7 +134,7 @@ main {
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 32px;
+  padding: 24px 28px;
   margin-bottom: 24px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.04);
 }
@@ -143,7 +143,7 @@ main {
   font-size: 14px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -167,7 +167,7 @@ main {
 .drop-zone {
   border: 2px dashed var(--border);
   border-radius: 14px;
-  padding: 48px 24px;
+  padding: 26px 24px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s;
@@ -181,15 +181,25 @@ main {
 }
 
 .drop-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  background: var(--primary-light);
+  border-radius: 15px;
+}
+.drop-zone:hover .drop-icon, .drop-zone.drag-over .drop-icon {
+  background: #fff;
 }
 
 .drop-text {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .drop-sub {
@@ -217,7 +227,7 @@ main {
 
 .preview-area img {
   width: 100%;
-  max-height: 320px;
+  max-height: 260px;
   object-fit: contain;
   border-radius: 10px;
   border: 1px solid var(--border);
@@ -1168,7 +1178,7 @@ main {
       <div class="drop-icon">🖼️</div>
       <div class="drop-text">ここに画像をドラッグ＆ドロップ</div>
       <div class="drop-sub">または <span onclick="document.getElementById('fileInput').click()">クリックしてファイルを選択</span></div>
-      <div class="drop-sub" style="margin-top:8px;">JPG・PNG・HEIC・WEBP対応 / スマホ写真そのままOK</div>
+      <div class="drop-sub" style="margin-top:5px;font-size:11px;">JPG・PNG・HEIC・WEBP対応 ／ スマホ写真そのままOK</div>
     </div>
     <input type="file" id="fileInput" accept="image/*,image/heic,image/heif">
 
@@ -1178,7 +1188,7 @@ main {
     </div>
 
     <!-- Step 2: 業種選択 -->
-    <div style="margin-top:24px;">
+    <div style="margin-top:20px;">
       <div class="card-title">
         <div class="card-title-num">2</div>
         業種を選択（任意）
