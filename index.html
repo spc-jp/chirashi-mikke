@@ -123,6 +123,16 @@ main {
   letter-spacing: -0.02em;
 }
 
+/* D案：黄色マーカー＋シアン色文字 */
+.catch h1 .mk {
+  background: linear-gradient(transparent 58%, #FFE066 58%);
+  padding: 0 3px;
+  border-radius: 2px;
+}
+.catch h1 .cyan {
+  color: var(--primary);
+}
+
 .catch p {
   font-size: 14px;
   color: var(--muted);
@@ -1162,7 +1172,7 @@ main {
 
   <!-- 変換モード キャッチ -->
   <div class="catch" id="convertCatch" style="text-align:center;margin-bottom:20px;">
-    <h1>チラシを撮るだけで<br>Web・SNSコンテンツに変換</h1>
+    <h1>チラシを<span class="mk">撮るだけで</span><br>Web・SNSコンテンツに<span class="cyan">変換</span></h1>
     <p>紙のチラシ・DM・メニュー表をアップロードするだけで<br>AIがSNS投稿文とWebページ用コンテンツを自動生成します</p>
   </div>
 
